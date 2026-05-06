@@ -73,6 +73,9 @@ services:
 
   litellm:
     image: ghcr.io/berriai/litellm:main-stable
+    depends_on:
+      db:
+        condition: service_healthy
     volumes:
       - ./litellm/config.yaml:/app/config.yaml:ro
     environment:
@@ -80,6 +83,9 @@ services:
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:-}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-odoo}:${POSTGRES_PASSWORD:-odoo}@db:5432/litellm
+      STORE_MODEL_IN_DB: "True"
     command: ["--config", "/app/config.yaml", "--port", "4000"]
     ports:
       - "4000:4000"

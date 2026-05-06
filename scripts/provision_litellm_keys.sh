@@ -49,7 +49,7 @@ CLOUD_DEV_KEY=$(curl -sf -X POST \
   -H "Content-Type: application/json" \
   -d '{"models":["github-dev"],"metadata":{"purpose":"apexive-cloud-dev"}}' \
   "${LITELLM_URL}/key/generate" \
-  | python3 -c "import json,sys; print(json.load(sys.stdin)['key'])")
+  | python -c "import json,sys; print(json.load(sys.stdin)['key'])")
 
 echo "    cloud-dev key: ${CLOUD_DEV_KEY:0:16}..."
 
@@ -59,7 +59,7 @@ LOCAL_KEY=$(curl -sf -X POST \
   -H "Content-Type: application/json" \
   -d '{"models":["prod-local"],"metadata":{"purpose":"apexive-local"}}' \
   "${LITELLM_URL}/key/generate" \
-  | python3 -c "import json,sys; print(json.load(sys.stdin)['key'])")
+  | python -c "import json,sys; print(json.load(sys.stdin)['key'])")
 
 echo "    local key:     ${LOCAL_KEY:0:16}..."
 
@@ -86,7 +86,7 @@ odoo_write() {
          \"kwargs\":{}
         }}" \
     "${ODOO_URL}/web/dataset/call_kw" \
-  | python3 -c "
+  | python -c "
 import json,sys
 d=json.load(sys.stdin)
 for r in d.get('result',[]):
