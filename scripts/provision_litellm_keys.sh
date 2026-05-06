@@ -6,7 +6,7 @@
 #   2. Updates the Apexive provider records in Odoo via JSON-RPC
 #
 # Run ONCE after `make up` and before running eval harness or chats.
-# Safe to re-run — regenerates keys and updates provider records.
+# Safe to re-run -- regenerates keys and updates provider records.
 #
 # Prerequisites:
 #   - LiteLLM stack running with LITELLM_MASTER_KEY set in .env
@@ -15,16 +15,20 @@
 # Usage:
 #   bash scripts/provision_litellm_keys.sh
 #
-# Env vars (all optional — defaults shown):
-#   LITELLM_URL      http://localhost:4000
-#   ODOO_URL         http://localhost:8069
-#   ODOO_ADMIN_PASS  admin
-#   DOTENV_FILE      .env
+# Env vars (all optional -- defaults shown):
+#   LITELLM_URL       http://localhost:4000
+#   ODOO_URL          http://localhost:8069
+#   ODOO_DB           ai_brain_dev
+#   ODOO_ADMIN_LOGIN  admin
+#   ODOO_ADMIN_PASS   admin
+#   DOTENV_FILE       .env
 
 set -euo pipefail
 
 LITELLM_URL="${LITELLM_URL:-http://localhost:4000}"
 ODOO_URL="${ODOO_URL:-http://localhost:8069}"
+ODOO_DB="${ODOO_DB:-ai_brain_dev}"
+ODOO_ADMIN_LOGIN="${ODOO_ADMIN_LOGIN:-admin}"
 ODOO_ADMIN_PASS="${ODOO_ADMIN_PASS:-admin}"
 DOTENV_FILE="${DOTENV_FILE:-.env}"
 
@@ -72,30 +76,58 @@ grep -v '^LITELLM_VKEY_' "$DOTENV_FILE" > "${DOTENV_FILE}.tmp" && mv "${DOTENV_F
   echo "LITELLM_VKEY_LOCAL=${LOCAL_KEY}"
 } >> "$DOTENV_FILE"
 
-# Update Odoo provider records via JSON-RPC
+# Update Odoo provider records via JSON-RPC (authenticated session)
+echo "--> Authenticating with Odoo (db=${ODOO_DB})..."
+
+COOKIE_JAR=$(mktemp)
+trap 'rm -f "$COOKIE_JAR"' EXIT
+
+AUTH_RESULT=$(curl -sf -X POST \
+  -H "Content-Type: application/json" \
+  -c "$COOKIE_JAR" \
+  -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"id\":0,\"params\":{
+       \"db\":\"${ODOO_DB}\",
+       \"login\":\"${ODOO_ADMIN_LOGIN}\",
+       \"password\":\"${ODOO_ADMIN_PASS}\"
+      }}" \
+  "${ODOO_URL}/web/session/authenticate")
+
+AUTH_UID=$(echo "$AUTH_RESULT" | python -c "import json,sys; r=json.load(sys.stdin).get('result',{}); print(r.get('uid','') if r else '')")
+
+if [ -z "$AUTH_UID" ] || [ "$AUTH_UID" = "None" ] || [ "$AUTH_UID" = "false" ]; then
+  echo "ERROR: Odoo authentication failed (db=${ODOO_DB}, login=${ODOO_ADMIN_LOGIN})."
+  echo "  Ensure ai_brain_dev DB is initialized and Odoo is running."
+  exit 1
+fi
+
+echo "    authenticated uid=${AUTH_UID}"
+
 echo "--> Updating Odoo llm.provider records..."
 
-odoo_write() {
-  local model="$1" domain="$2" field="$3" value="$4"
-  curl -sf -X POST \
-    -H "Content-Type: application/json" \
-    -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"id\":1,\"params\":{
-         \"model\":\"${model}\",
-         \"method\":\"search_read\",
-         \"args\":[[${domain}],[\"id\",\"name\"]],
-         \"kwargs\":{}
-        }}" \
-    "${ODOO_URL}/web/dataset/call_kw" \
-  | python -c "
-import json,sys
-d=json.load(sys.stdin)
-for r in d.get('result',[]):
-    print(r['id'])
-"
-}
+# Search for provider IDs
+CLOUD_ID=$(curl -sf -X POST \
+  -H "Content-Type: application/json" \
+  -b "$COOKIE_JAR" \
+  -d '{"jsonrpc":"2.0","method":"call","id":1,"params":{
+       "model":"llm.provider",
+       "method":"search_read",
+       "args":[[["name","=","litellm-cloud-dev"]],["id","name"]],
+       "kwargs":{}
+      }}' \
+  "${ODOO_URL}/web/dataset/call_kw" \
+  | python -c "import json,sys; r=json.load(sys.stdin).get('result',[]); print(r[0]['id'] if r else '')")
 
-CLOUD_ID=$(odoo_write "llm.provider" '"name","=","litellm-cloud-dev"' "" "")
-LOCAL_ID=$(odoo_write "llm.provider" '"name","=","litellm-local"' "" "")
+LOCAL_ID=$(curl -sf -X POST \
+  -H "Content-Type: application/json" \
+  -b "$COOKIE_JAR" \
+  -d '{"jsonrpc":"2.0","method":"call","id":2,"params":{
+       "model":"llm.provider",
+       "method":"search_read",
+       "args":[[["name","=","litellm-local"]],["id","name"]],
+       "kwargs":{}
+      }}' \
+  "${ODOO_URL}/web/dataset/call_kw" \
+  | python -c "import json,sys; r=json.load(sys.stdin).get('result',[]); print(r[0]['id'] if r else '')")
 
 if [ -z "$CLOUD_ID" ] || [ -z "$LOCAL_ID" ]; then
   echo "WARNING: Could not find llm.provider records in Odoo."
@@ -103,10 +135,13 @@ if [ -z "$CLOUD_ID" ] || [ -z "$LOCAL_ID" ]; then
   exit 0
 fi
 
+echo "    cloud provider id=${CLOUD_ID}, local provider id=${LOCAL_ID}"
+
 # Write cloud-dev key
 curl -sf -X POST \
   -H "Content-Type: application/json" \
-  -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"id\":2,\"params\":{
+  -b "$COOKIE_JAR" \
+  -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"id\":3,\"params\":{
        \"model\":\"llm.provider\",
        \"method\":\"write\",
        \"args\":[[${CLOUD_ID}],{\"api_key\":\"${CLOUD_DEV_KEY}\"}],
@@ -117,7 +152,8 @@ curl -sf -X POST \
 # Write local key
 curl -sf -X POST \
   -H "Content-Type: application/json" \
-  -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"id\":3,\"params\":{
+  -b "$COOKIE_JAR" \
+  -d "{\"jsonrpc\":\"2.0\",\"method\":\"call\",\"id\":4,\"params\":{
        \"model\":\"llm.provider\",
        \"method\":\"write\",
        \"args\":[[${LOCAL_ID}],{\"api_key\":\"${LOCAL_KEY}\"}],
@@ -127,7 +163,7 @@ curl -sf -X POST \
 
 echo ""
 echo "==> Done. Provider keys updated in Odoo."
-echo "    Dev Assistant  → litellm-cloud-dev → github-dev  (GitHub Models)"
-echo "    Local Assistant → litellm-local    → prod-local  (Ollama qwen2.5:7b)"
+echo "    Dev Assistant  -> litellm-cloud-dev -> github-dev  (GitHub Models)"
+echo "    Local Assistant -> litellm-local    -> prod-local  (Ollama qwen2.5:7b)"
 echo ""
 echo "    To verify scope enforcement, run: make eval --filter task_007"

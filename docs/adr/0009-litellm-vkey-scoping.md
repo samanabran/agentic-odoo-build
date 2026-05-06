@@ -53,3 +53,24 @@ before the upstream provider is contacted.
 - **Per-request model validation in orchestrator:** adds code that can
   drift; LiteLLM enforcement is authoritative and cannot be bypassed by
   application bugs. Rejected as the primary control.
+
+## Live verification (PR #7 — 2026-05-07)
+
+Provisioned via ash scripts/provision_litellm_keys.sh after make bootstrap-pydantic:
+
+`
+==> Done. Provider keys updated in Odoo.
+    cloud provider id=1, local provider id=2
+`
+
+psql confirm — scoped keys written to llm_provider:
+
+`
+ id |       name        |        api_base        |   api_key_prefix
+----+-------------------+------------------------+---------------------
+  1 | litellm-cloud-dev | http://litellm:4000/v1 | sk-fEzeWv7prTtMZ...
+  2 | litellm-local     | http://litellm:4000/v1 | sk-A9f620-rZEw_f...
+`
+
+Keys also written to .env as LITELLM_VKEY_CLOUD_DEV and LITELLM_VKEY_LOCAL.
+Status: **observed**.

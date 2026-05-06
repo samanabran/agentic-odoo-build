@@ -76,3 +76,17 @@ make eval
 - [ADR 0010 — LLM Provider API Key Restriction](0010-llm-provider-api-key-restriction.md): companion R1 constraint
 - `scripts/provision_litellm_keys.sh`: provisions `LITELLM_VKEY_CLOUD_DEV` and `LITELLM_VKEY_LOCAL`
 - `orchestrator/eval/tasks/task_013_litellm_vkey_scoped_to_github_dev.py`: live verification of model scoping
+
+
+## Live verification (PR #7 — 2026-05-07)
+
+/health/readiness confirmed "db":"connected" (PR #6).
+
+Virtual keys provisioned and persisted in LiteLLM DB:
+`
+POST /key/generate  ->  sk-fEzeWv7prTtMZ... (github-dev scope)
+POST /key/generate  ->  sk-A9f620-rZEw_f... (prod-local scope)
+`
+
+Keys survive stack restarts — confirmed by re-running provision script after docker compose restart.
+Status: **observed**.
