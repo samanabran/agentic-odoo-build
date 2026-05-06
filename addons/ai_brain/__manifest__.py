@@ -23,7 +23,6 @@
     "data": [
         "security/ir.model.access.csv",
         "data/llm_providers.xml",
-        "views/systray_icon.xml",
     ],
     "assets": {
         "web.assets_backend": [

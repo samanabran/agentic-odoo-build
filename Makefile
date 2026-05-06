@@ -4,12 +4,17 @@ ORCH_CONTAINER  = $(shell docker ps -qf "name=orchestrator")
 DB_CONTAINER    = $(shell docker ps -qf "name=db")
 
 .PHONY: up up-private down logs shell-odoo shell-orch \
-        test eval seed reindex lint
+        test eval seed reindex lint bootstrap-pydantic
 
-# ── Stack ─────────────────────────────────────────────────────────────────────
+# -- Stack ---------------------------------------------------------------------
 
 up:
 	$(COMPOSE) up -d
+
+bootstrap-pydantic:  ## install vendor llm deps missing from Odoo 18 base image (ADR 0012)
+	$(COMPOSE) exec odoo pip install --break-system-packages \
+	  pydantic mcp emoji markdown2 jinja2 pyyaml jsonschema \
+	  openai ollama pgvector numpy requests markdownify PyMuPDF
 
 up-private:
 	$(COMPOSE) --profile private up -d
@@ -26,7 +31,7 @@ shell-odoo:
 shell-orch:
 	docker exec -it $(ORCH_CONTAINER) bash
 
-# ── Quality ───────────────────────────────────────────────────────────────────
+# -- Quality -------------------------------------------------------------------
 
 test:
 	cd orchestrator && python -m pytest tests/ -v --cov=app --cov-report=term-missing
@@ -35,12 +40,12 @@ lint:
 	cd orchestrator && python -m ruff check app/ eval/ tests/ && \
 	  python -m mypy app/ --ignore-missing-imports
 
-# ── Eval harness ─────────────────────────────────────────────────────────────
+# -- Eval harness --------------------------------------------------------------
 
 eval:
 	cd orchestrator && python -m eval.runner
 
-# ── Data ─────────────────────────────────────────────────────────────────────
+# -- Data ----------------------------------------------------------------------
 
 seed:
 	python scripts/seed_demo.py

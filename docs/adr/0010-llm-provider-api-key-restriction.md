@@ -84,3 +84,19 @@ class LLMProvider(models.Model):
 - **No restriction (vendor default):** any internal user could exfiltrate the
   virtual key and use it to exhaust the daily GitHub Models quota or probe
   LiteLLM internals. Rejected.
+
+## Live verification (PR #7 — 2026-05-07)
+
+llm.provider records confirmed in i_brain_dev DB after i_brain module install:
+
+`sql
+SELECT id, name, api_base FROM llm_provider ORDER BY id;
+ id |       name        |        api_base
+----+-------------------+------------------------
+  1 | litellm-cloud-dev | http://litellm:4000/v1
+  2 | litellm-local     | http://litellm:4000/v1
+`
+
+pi_key field updated with scoped LiteLLM virtual keys via scripts/provision_litellm_keys.sh.
+ORM write used authenticated admin session (JSON-RPC, cookie-based auth).
+Status: **observed**.
