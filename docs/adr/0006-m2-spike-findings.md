@@ -152,3 +152,33 @@ announced but have not shipped 5+ months later).
 **M1 gate results (odoo:18.0):** see PR description on chore/rollback-to-odoo-18.
 
 **Status:** CLOSED. M2 may proceed against Odoo 18 as originally scoped.
+---
+
+## R1 Closure — 2026-05-07
+
+Risk R1 ("Apexive llm_openai behavior against LiteLLM") is **CLOSED**.
+Both constraints are implemented and verified.
+
+### Constraint 1 — vkey scoped to github-dev only
+
+**Decision:** ADR 0009 (docs/adr/0009-litellm-vkey-scoping.md)  
+**Implementation:** scripts/provision_litellm_keys.sh — models:["github-dev"] at key generation  
+**Proof:** 	ask_013_litellm_vkey_scoped_to_github_dev — asserts 200 on allowed model, 4xx on blocked model
+
+### Constraint 2 — pi_key hidden from non-admin users
+
+**Decision:** ADR 0010 (docs/adr/0010-llm-provider-api-key-restriction.md)  
+**Implementation:** ddons/ai_brain/models/llm_provider_override.py — groups="base.group_system" + self.sudo()  
+**Proof:** 	ask_012_llm_openai_non_admin_read — asserts admin visibility, non-admin omission, sudo path success
+
+### Eval coverage (tasks 009–013)
+
+| Task | Type | Proves |
+|---|---|---|
+| 009 | positive | 3-part gateway proof (header + spend + request_id) |
+| 010 | negative | no bypass when LiteLLM down |
+| 011 | negative | 401 on invalid vkey, no upstream spend |
+| 012 | positive | api_key field restriction + sudo() path |
+| 013 | negative | vkey scope enforcement (allowed vs blocked model) |
+
+**ADR 0006 status: CLOSED.**
