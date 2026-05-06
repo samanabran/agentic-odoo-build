@@ -6,3 +6,4 @@ from . import llm_provider_usage   # M2 token-usage capture
 #   M3: ai.conversation  ai.message
 #   M4: ai.tool.log extended, ai.policy
 #   M5: ai.knowledge.chunk
+from . import llm_provider_override  # R1-C2: api_key field restriction
