@@ -54,3 +54,17 @@ upgrade project to manage.
 
 Risk acceptance: If vendor module loading on Odoo 19 requires a fork, ADR 0002b
 will be opened and the porting scope bounded before M2 merges.
+---
+
+## Rollback record — 2026-05-06
+
+The M2 discovery spike (ADR 0006) revealed a structural hard block: Odoo 19's
+check_version() function rejects all modules whose version string begins with
+18.0.. Because the B2 zero-diff constraint prevents patching vendor manifests
+in place, Option A (Odoo 19) is **SUPERSEDED**.
+
+**Effective 2026-05-06**, the project runs on **Odoo 18 Community Edition**
+(odoo:18.0) per the fallback plan in ADR 0005, item B.
+
+The Odoo 19 upgrade can be revisited once Apexive publishes an official 19.0
+branch. See ADR 0007 for the image digest pin.

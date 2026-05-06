@@ -29,6 +29,8 @@ Never start the next milestone without explicit human approval. Never silently r
 
 **A1. Tests before merge.** `make test` must be green. `make eval` must not regress vs main.
 
+**A1. Merge strategy: Squash and merge.** Every PR lands as a single commit on `main`. This keeps the log readable and makes `git bisect` useful. Set in repo Settings → General → Pull Requests → Allow squash merging (only).
+
 **A1. ADR for every non-obvious decision.** File in `docs/adr/`, numbered sequentially. Required when choosing between two or more reasonable options.
 
 **A2. Secrets.** Never embed in code, config, commits, logs, or chat. All secrets in `.env` (gitignored), placeholders in `.env.example`. When a secret is needed: stop, name the variable and why, wait. Do not invent fake-but-valid-looking keys. gitleaks pre-commit hook blocks offending commits.
@@ -48,7 +50,7 @@ Never start the next milestone without explicit human approval. Never silently r
 ### Tier 1 — Docker images (M1)
 | Image | Service |
 |---|---|
-| `odoo:19.0` | odoo |
+| `odoo:18.0` | odoo |
 | `pgvector/pgvector:pg16` | db |
 | `redis:7-alpine` | redis |
 | `ghcr.io/berriai/litellm:main-stable` | litellm |
@@ -82,9 +84,9 @@ SHA changes require an ADR update (0002) and a "vendor bump" PR separate from fe
 
 ## Section C — Odoo version (locked)
 
-**Odoo 19 Community Edition** (`odoo:19.0`). Chosen by the project owner 2026-05-06 (ADR 0004, ADR 0005).
+**Odoo 18 Community Edition** (`odoo:18.0`). Downgraded from Odoo 19 on 2026-05-06 after M2 spike confirmed hard version-check block (ADR 0006). See ADR 0007 for image digest pin.
 
-Rollback path if a hard blocker is discovered: swap `odoo:19.0` → `odoo:18.0` in docker-compose, update manifest version prefix. One-commit change. See ADR 0005.
+Original Odoo 19 rollback has been executed. See ADR 0006 (spike) and ADR 0007 (image pin) for details. To upgrade back to Odoo 19: update docker-compose image, manifest prefix, and vendor pin once Apexive publishes a 19.0 branch.
 
 ---
 

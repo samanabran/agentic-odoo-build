@@ -7,7 +7,7 @@
 ```
 Browser (Odoo Web Client + AI Chat Panel)
         │ WebSocket / JSON-RPC
-Odoo 19 (OWL frontend · ORM · PostgreSQL)
+Odoo 18 (OWL frontend · ORM · PostgreSQL)
   ├── productivity.ai (native AI app)
   ├── odoo-llm vendor modules
   └── ai_brain (our module: chat widget, audit, approval)
@@ -25,7 +25,7 @@ PostgreSQL 16 + pgvector   Redis   Ollama (PRIVATE_MODE)
 
 | Service | Image | Port | Purpose |
 |---|---|---|---|
-| `odoo` | `odoo:19.0` | 8069 | ERP + chat surface |
+| `odoo` | `odoo:18.0` | 8069 | ERP + chat surface |
 | `orchestrator` | local build | 8088 | FastAPI LLM orchestrator |
 | `litellm` | `ghcr.io/berriai/litellm:main-stable` | 4000 | LLM gateway |
 | `db` | `pgvector/pgvector:pg16` | 5432 | Postgres + vector store |

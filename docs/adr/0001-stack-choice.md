@@ -22,6 +22,10 @@ Initial infrastructure decisions before the first line of production code is wri
 
 **Risk accepted:** Apexive's `odoo-llm` has no 19.0 branch as of May 2026. Managed via the vendor-patch strategy (ADR 0002).
 
+> **Superseded 2026-05-06:** M2 spike (ADR 0006) confirmed Odoo 19 hard-blocks
+> all 18.0.x vendor modules. Project downgraded to **Odoo 18 Community**
+> per the ADR 0005 rollback plan. See ADR 0007 for the pinned image digest.
+
 ---
 
 ## Decision 2 — LiteLLM as the LLM gateway

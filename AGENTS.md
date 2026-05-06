@@ -18,7 +18,7 @@ Tests live in `orchestrator/tests/`. Coverage target: **80% minimum**.
 ## Project layout
 
 ```
-addons/ai_brain/       Odoo 19 module (OWL frontend + Python models)
+addons/ai_brain/       Odoo 18 module (OWL frontend + Python models)
 addons/vendor/         git submodule — apexive/odoo-llm (pinned SHA, never patch in-place)
 orchestrator/app/      FastAPI orchestrator (Python 3.11)
 infra/                 docker-compose, LiteLLM config, nginx
@@ -29,7 +29,7 @@ docs/adr/              Architecture Decision Records (numbered, read before chan
 
 | Layer | Tech |
 |---|---|
-| ERP | Odoo 19 Community (`odoo:19.0`) |
+| ERP | Odoo 18 Community (`odoo:18.0`) |
 | Orchestrator | Python 3.11 · FastAPI · LangGraph · LiteLLM |
 | DB | PostgreSQL 16 + pgvector |
 | Cache | Redis |
@@ -66,9 +66,9 @@ Production startup hard-fails if `DEFAULT_MODEL` references a `github/*` endpoin
 | `ai.tool.log` | (M4) | Append-only audit trail |
 | `ai.knowledge.chunk` | (M5) | Vectorised record embeddings |
 
-## Odoo 19 conventions
+## Odoo 18 conventions
 
-- Module version prefix: `19.0.x.y.z`
+- Module version prefix: `18.0.x.y.z`
 - Field names follow Odoo ORM conventions; use `fields.Date.today()` (not `fields.date.today()`)
 - AI-origin records must inherit `ai.origin.mixin` and carry `x_ai_origin_conversation_id`, `x_ai_origin_message_id`, `x_ai_created_at`
 - Sensitive fields stripped via `orchestrator/app/security/redaction.py` + `infra/redaction.yaml` before any external LLM call
@@ -95,5 +95,5 @@ Full list: `.env.example`
 - [0001](docs/adr/0001-stack-choice.md) Stack choices
 - [0002](docs/adr/0002-vendor-pinning.md) Vendor pinning policy
 - [0003](docs/adr/0003-github-models-dev-only.md) GitHub Models dev-only policy
-- [0004](docs/adr/0004-odoo-version-decision.md) Odoo 19 selection
+- [0004](docs/adr/0004-odoo-version-decision.md) Odoo version decision (downgraded to 18)
 - [0005](docs/adr/0005-version-locked.md) Version lock rationale

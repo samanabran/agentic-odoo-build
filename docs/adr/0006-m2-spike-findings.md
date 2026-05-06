@@ -127,3 +127,28 @@ planned. The vendor modules are actively maintained on the 18.0 branch.
 Odoo 18 is supported until October 2027. The upgrade to Odoo 19 can be
 revisited once Apexive publishes an official 19.0 branch (which they
 announced but have not shipped 5+ months later).
+---
+
+## Resolution — 2026-05-06
+
+**Decision:** Downgrade to Odoo 18 Community Edition per ADR 0005 rollback plan.
+**Approved by:** project owner (explicit approval received 2026-05-06).
+
+**Actions taken (single commit chore/rollback-to-odoo-18):**
+
+| File | Change |
+|---|---|
+| infra/docker-compose.yml | odoo:19.0 → pinned digest sha256:b79d87a4... (ADR 0007) |
+| ddons/ai_brain/__manifest__.py | "version": "19.0.1.0.0" → "18.0.1.0.0" |
+| docs/adr/0004-odoo-version-decision.md | Rollback record appended |
+| docs/adr/0005-version-locked.md | Odoo row updated; rollback record appended |
+| docs/adr/0001-stack-choice.md | Decision 1 superseded footnote added |
+| docs/ARCHITECTURE.md | odoo:19.0 → odoo:18.0 |
+| scripts/bootstrap.sh | docker pull odoo:19.0 → odoo:18.0 |
+| .env.example | ODOO_VERSION=19.0 → 18.0 |
+| AGENTS.md | Odoo 19 → 18 (stack table, module prefix, conventions heading) |
+| CLAUDE.md | Section B Tier 1 table + Section C updated |
+
+**M1 gate results (odoo:18.0):** see PR description on chore/rollback-to-odoo-18.
+
+**Status:** CLOSED. M2 may proceed against Odoo 18 as originally scoped.
