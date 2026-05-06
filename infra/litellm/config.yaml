@@ -1,0 +1,40 @@
+model_list:
+  # Production primary (D1) — Anthropic claude-haiku-4-5
+  # Pinned to exact release date for reproducibility.
+  - model_name: prod-default
+    litellm_params:
+      model: anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # Production alternate (D1) — OpenAI gpt-4o-mini
+  - model_name: prod-alternate
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  # Private mode — local Ollama (only available when `make up-private`)
+  - model_name: prod-local
+    litellm_params:
+      model: ollama/qwen2.5:7b
+      api_base: http://ollama:11434
+
+  # Development + eval harness default (D1, D5)
+  # Canonical GitHub Models endpoint per addendum D5.
+  # MUST NOT be selected when ENVIRONMENT=production (orchestrator enforces this).
+  # Copilot rate limit: 15 req/min, ~150-300 req/day on low-tier models.
+  # See docs/adr/0003-github-models-dev-only.md
+  - model_name: github-dev
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+litellm_settings:
+  drop_params: true
+  request_timeout: 60
+  success_callback: []
+  failure_callback: []
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY   # enables /key/generate endpoint (M2)
+  store_model_in_db: false                     # stateless; keys passed via env

@@ -1,0 +1,7 @@
+{
+  "title": "Odoo AI Brain",
+  "uid": "ai-brain-main",
+  "schemaVersion": 38,
+  "panels": [],
+  "__note": "Populated in M8 with panels for llm_requests_total, llm_tokens_total, llm_cost_usd_total, tool_calls_total, tool_latency_seconds, rag_queries_total, rag_latency_seconds"
+}

@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ai_origin_mixin_user,ai.origin.mixin user,model_ai_origin_mixin,base.group_user,1,0,0,0
+access_ai_tool_log_user,ai.tool.log user read,model_ai_tool_log,base.group_user,1,0,0,0
+access_ai_tool_log_system,ai.tool.log system write,model_ai_tool_log,base.group_system,1,1,1,0

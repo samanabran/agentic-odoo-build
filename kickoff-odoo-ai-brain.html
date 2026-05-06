@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Project Kickoff — Odoo + AI Brain (Claude Code Brief)</title>
+<style>
+  :root{
+    --bg:#fafafa; --ink:#1a1a1a; --muted:#666; --line:#e5e5e5;
+    --accent:#2b6cb0; --accent-soft:#eaf2fb;
+    --code-bg:#f4f4f4; --warn:#b45309; --warn-bg:#fff7ed;
+    --ok:#15803d; --ok-bg:#f0fdf4;
+    --info:#0369a1; --info-bg:#f0f9ff;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    font-size:16px;line-height:1.7;}
+  .wrap{max-width:900px;margin:0 auto;padding:56px 28px 96px;}
+  header{border-bottom:1px solid var(--line);padding-bottom:32px;margin-bottom:40px;}
+  h1{font-size:2.1rem;font-weight:600;margin:0 0 10px;letter-spacing:-.5px;}
+  h2{font-size:1.45rem;font-weight:600;margin:56px 0 16px;letter-spacing:-.3px;
+     border-bottom:1px solid var(--line);padding-bottom:8px;}
+  h3{font-size:1.12rem;font-weight:600;margin:32px 0 10px;color:#222;}
+  h4{font-size:1rem;font-weight:600;margin:22px 0 8px;color:#333;}
+  p{margin:0 0 14px;}
+  .lede{color:var(--muted);font-size:1.05rem;margin-top:6px;}
+  code{background:var(--code-bg);padding:2px 6px;border-radius:3px;
+       font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.88em;}
+  pre{background:#1e1e1e;color:#e6e6e6;padding:18px 22px;border-radius:6px;
+      overflow-x:auto;font-size:.84rem;line-height:1.55;}
+  pre code{background:none;padding:0;color:inherit;}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:.94rem;}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-weight:600;background:#f0f0f0;}
+  ul,ol{padding-left:22px;margin:8px 0 16px;}
+  li{margin-bottom:6px;}
+  .meta{color:var(--muted);font-size:.9rem;}
+  .callout{border-left:3px solid var(--accent);background:var(--accent-soft);
+           padding:14px 20px;margin:18px 0;border-radius:0 4px 4px 0;}
+  .warn{border-left-color:var(--warn);background:var(--warn-bg);}
+  .ok{border-left-color:var(--ok);background:var(--ok-bg);}
+  .info{border-left-color:var(--info);background:var(--info-bg);}
+  .toc{background:#fff;border:1px solid var(--line);border-radius:6px;
+       padding:18px 24px;margin-bottom:32px;}
+  .toc ol{margin:0;padding-left:20px;}
+  .toc a{color:var(--ink);text-decoration:none;}
+  .toc a:hover{color:var(--accent);text-decoration:underline;}
+  .ascii{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:.78rem;
+         line-height:1.45;white-space:pre;background:#fff;border:1px solid var(--line);
+         padding:18px;border-radius:6px;overflow-x:auto;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;}
+  .card{border:1px solid var(--line);border-radius:6px;padding:14px 18px;background:#fff;}
+  .card h4{margin-top:0;}
+  hr{border:none;border-top:1px solid var(--line);margin:48px 0;}
+  footer{margin-top:64px;padding-top:24px;border-top:1px solid var(--line);
+         color:var(--muted);font-size:.9rem;}
+  .plain-box{background:#fff;border:1px solid var(--line);border-radius:6px;
+             padding:18px 24px;margin:18px 0;}
+  .plain-box h4{margin-top:0;color:var(--accent);}
+  .step{display:flex;gap:14px;margin:16px 0;}
+  .step-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;
+            background:var(--accent);color:#fff;display:flex;align-items:center;
+            justify-content:center;font-weight:600;font-size:.9rem;}
+  .step-body{flex:1;}
+  .step-body h4{margin:4px 0 6px;}
+  .copy-block{position:relative;background:#fff;border:2px dashed var(--accent);
+              border-radius:6px;padding:18px 22px;margin:20px 0;}
+  .copy-block::before{content:"📋 COPY THIS TO CLAUDE CODE";position:absolute;
+                       top:-11px;left:18px;background:var(--bg);padding:0 10px;
+                       font-size:.75rem;font-weight:600;color:var(--accent);
+                       letter-spacing:.5px;}
+  @media(max-width:640px){.grid{grid-template-columns:1fr;} .wrap{padding:32px 18px;}}
+  @media print{body{background:#fff;}.copy-block{break-inside:avoid;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Project Kickoff Document</h1>
+  <p class="lede">Odoo + AI Brain — a unified ERP where AI takes ownership of every app and every record, and helps users through an in-app chat assistant.</p>
+  <p class="meta">Document purpose: (1) explain the project to non-technical stakeholders, (2) serve as a one-shot brief to paste into Claude Code so the build can begin. Version 1.0 · Target: Odoo 19.</p>
+</header>
+
+<nav class="toc">
+  <strong>Contents</strong>
+  <ol>
+    <li><a href="#part1">Part 1 — Plain-language overview (for everyone)</a></li>
+    <li><a href="#part2">Part 2 — How to use this document with Claude Code</a></li>
+    <li><a href="#part3">Part 3 — The Claude Code kickoff brief (copy block)</a></li>
+    <li><a href="#part4">Part 4 — Detailed technical specification</a></li>
+    <li><a href="#part5">Part 5 — Build sequence (week-by-week)</a></li>
+    <li><a href="#part6">Part 6 — Acceptance checklist</a></li>
+  </ol>
+</nav>
+
+<!-- =============================================================== -->
+<!-- PART 1 — PLAIN LANGUAGE                                          -->
+<!-- =============================================================== -->
+<section id="part1">
+<h2>Part 1 · Plain-language overview</h2>
+
+<div class="callout info">
+This part is written for business owners, managers, and anyone non-technical. No jargon. If you only read one section, read this one.
+</div>
+
+<h3>What we're building, in one sentence</h3>
+<p>We are setting up Odoo (a complete business management system) and putting an AI assistant on top of it that knows everything inside Odoo and can help anyone in the company through a chat box.</p>
+
+<h3>The simple picture</h3>
+<div class="plain-box">
+  <h4>Think of Odoo as a giant filing cabinet</h4>
+  <p>Inside Odoo there are folders for customers, sales, invoices, products, employees, projects, support tickets — everything a business runs on. Today, a person has to open the right drawer, find the right folder, read it, and decide what to do.</p>
+  <h4>Now imagine an assistant who has read every folder</h4>
+  <p>That's the AI. It sits next to the filing cabinet. You ask it a question in plain English — "Which customers haven't paid us in 60 days?" or "Reconcile last week's bank statement" — and it goes into the cabinet, finds the answer, and either tells you or prepares the work for you to approve.</p>
+  <h4>Where you talk to it</h4>
+  <p>There is a chat box inside Odoo, on every screen. You click it, type your question, and the AI answers. If it needs to make a change (like creating a quote or posting an invoice), it shows you the change first and waits for you to click <em>Approve</em>.</p>
+</div>
+
+<h3>What the AI is allowed to do</h3>
+<ul>
+  <li><strong>Read</strong> any record the user is allowed to see — customers, invoices, stock, tickets, projects, etc.</li>
+  <li><strong>Summarize</strong> long lists, complex reports, or message threads.</li>
+  <li><strong>Search</strong> using natural language ("show me all overdue invoices from European clients").</li>
+  <li><strong>Draft</strong> work — quotes, follow-up emails, journal entries, tasks — but not finalize them without permission.</li>
+  <li><strong>Act</strong>, with approval, on important things like posting invoices, sending emails, or reconciling bank lines.</li>
+</ul>
+
+<h3>What the AI is NOT allowed to do</h3>
+<ul>
+  <li>It cannot see anything the logged-in user is not allowed to see. It uses Odoo's own permission system. There is no backdoor.</li>
+  <li>It cannot post invoices, send emails, or make money-moving changes without a human clicking Approve.</li>
+  <li>It cannot send sensitive data (salaries, bank accounts, personal IDs) to external AI providers when "private mode" is on — it uses a local AI model instead.</li>
+</ul>
+
+<h3>Why this is valuable</h3>
+<p>Most ERPs require training to use. Staff spend hours hunting through menus, exporting to Excel, writing follow-ups, matching payments to invoices. The AI brain collapses that work into a conversation. A junior accountant asks "what's wrong with vendor ABC's balance?" and gets an answer with the supporting evidence in seconds. A salesperson asks "draft a quote like the last one for ACME but with 5% discount" and reviews a finished draft. Time saved is measured in hours per person per day.</p>
+
+<h3>How long it takes and what it needs</h3>
+<table>
+  <tbody>
+    <tr><td><strong>Build time</strong></td><td>Roughly 6 months to a stable production rollout, with the first useful version in about 8 weeks.</td></tr>
+    <tr><td><strong>Team</strong></td><td>1 functional consultant, 2 Odoo developers, 1 AI engineer, 1 DevOps, 1 product owner.</td></tr>
+    <tr><td><strong>Servers</strong></td><td>One server for Odoo, one for the AI service, optionally one with a graphics card if we want a private/local AI.</td></tr>
+    <tr><td><strong>External services</strong></td><td>An OpenAI or Anthropic account (paid per usage). Optional: a self-hosted model for private data.</td></tr>
+  </tbody>
+</table>
+
+<h3>What can go wrong (and how we handle it)</h3>
+<table>
+  <thead><tr><th>Concern</th><th>How we address it</th></tr></thead>
+  <tbody>
+    <tr><td>"The AI makes a mistake and ruins our data."</td><td>Every AI-made change is tagged. High-impact changes need human approval. We keep a log of everything and can roll back.</td></tr>
+    <tr><td>"It exposes our customer data to OpenAI."</td><td>We can run in private mode using a local AI. Sensitive fields are hidden before any data leaves our servers.</td></tr>
+    <tr><td>"It costs too much in API fees."</td><td>We set monthly budgets per user, route simple questions to a cheap model, and cache common answers.</td></tr>
+    <tr><td>"It tells users wrong information confidently."</td><td>Every answer shows the source records it used, so users can verify in one click.</td></tr>
+  </tbody>
+</table>
+
+<h3>Existing projects we are building on top of</h3>
+<p>We are not starting from zero. There are already two solid foundations we will use:</p>
+<ol>
+  <li><strong>Odoo's own AI app</strong> (built into Odoo 19) — gives us the chat panel and a basic agent system.</li>
+  <li><strong>Apexive's open-source <code>odoo-llm</code> framework</strong> — gives us provider switching (OpenAI, Anthropic, local), a tool system, and pre-made accounting tools.</li>
+</ol>
+<p>Our custom work focuses on the parts those don't cover: stronger approval and audit, a private-mode redaction layer, a cleaner chat UX, and any industry-specific tools the client needs.</p>
+</section>
+
+<!-- =============================================================== -->
+<!-- PART 2 — HOW TO USE WITH CLAUDE CODE                            -->
+<!-- =============================================================== -->
+<section id="part2">
+<h2>Part 2 · How to use this document with Claude Code</h2>
+
+<p>Claude Code is a tool that lets you delegate coding tasks from your terminal or desktop. To kick off this project, you give it the brief from Part 3 of this document. It will then create the project structure, install dependencies, and begin building according to the sequence.</p>
+
+<h3>Step-by-step</h3>
+
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <h4>Prepare an empty folder</h4>
+    <p>On your computer, create a folder for the project, for example <code>~/projects/odoo-ai-brain</code>. Open a terminal in that folder.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <h4>Start Claude Code in that folder</h4>
+    <p>Run <code>claude</code> in the terminal (or open the Claude Code desktop app and point it at the folder). You should see a prompt waiting for input.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <h4>Copy the brief from Part 3</h4>
+    <p>Scroll to Part 3 below. Copy the entire text inside the dashed box. Paste it into Claude Code as your first message and send.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <h4>Let Claude Code plan, then approve</h4>
+    <p>Claude Code will read the brief, propose a project structure and a plan, and ask you to confirm before it starts creating files. Review the plan, ask follow-up questions if anything is unclear, then approve.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">5</div>
+  <div class="step-body">
+    <h4>Provide secrets when asked</h4>
+    <p>Claude Code will ask for an OpenAI or Anthropic API key, and optionally an Odoo Enterprise subscription key. Have these ready. Never paste them into the chat — store them in a local <code>.env</code> file as Claude Code will instruct.</p>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-num">6</div>
+  <div class="step-body">
+    <h4>Work milestone by milestone</h4>
+    <p>The brief tells Claude Code to work in numbered milestones. After each milestone it should stop, summarize what it did, and wait for you to test before continuing. Do not skip the testing — each milestone builds on the last.</p>
+  </div>
+</div>
+
+<div class="callout warn">
+<strong>Important:</strong> Treat Claude Code as a senior developer pairing with you, not a magic box. Read its plans, ask questions, run the tests it writes, and push back when something looks off. The brief in Part 3 explicitly tells Claude Code to work this way.
+</div>
+</section>
+
+<!-- =============================================================== -->
+<!-- PART 3 — THE CLAUDE CODE BRIEF (COPY BLOCK)                     -->
+<!-- =============================================================== -->
+<section id="part3">
+<h2>Part 3 · The Claude Code kickoff brief</h2>
+
+<p>Copy everything inside the dashed box below — from <code>BEGIN BRIEF</code> to <code>END BRIEF</code> — and paste it as your first message to Claude Code.</p>
+
+<div class="copy-block">
+<pre><code>===== BEGIN BRIEF =====
+
+ROLE
+You are the lead engineer for a project called "Odoo AI Brain." You will
+plan, scaffold, and implement the project in this empty repository, working
+milestone by milestone. After each milestone, stop and wait for human
+review before continuing.
+
+PROJECT GOAL
+Set up Odoo 19 and add an AI layer on top of it. The AI must be able to
+read all apps and records the logged-in user is permitted to see, draft
+and (with approval) execute actions, and converse with the user through a
+chat panel embedded in the Odoo web client. Every action must be logged,
+reversible where possible, and obey Odoo's existing permission system.
+
+NON-NEGOTIABLES
+1. The AI never has more privilege than the user it is acting for. It
+   authenticates as that user via short-lived JWTs and goes through Odoo's
+   JSON-RPC API. No super-user backdoor.
+2. Write actions of medium or high impact require explicit user approval
+   in the chat UI before execution.
+3. Every AI-initiated read/write is recorded in an audit log
+   (model: ai.tool.log) with inputs, outputs, latency, and approver.
+4. Sensitive fields (configurable allowlist) must be redacted before any
+   payload is sent to an external LLM provider, unless the user is in the
+   group permitted to see them.
+5. The system supports a "private mode" tenant flag that forces routing
+   to a local Ollama model and disables all external LLM calls.
+6. We build ON TOP of two existing projects rather than reinventing them:
+   - Odoo 19's native AI app (productivity.ai) for the chat surface and
+     base agent framework.
+   - Apexive's open-source odoo-llm framework
+     (https://github.com/apexive/odoo-llm) for provider abstraction, tool
+     framework (@llm_tool decorator), MCP server, and the accounting tool
+     pack (llm_tool_account).
+   Our custom module ai_brain extends, glues, and hardens these layers.
+
+TARGET STACK
+- Odoo 19 (Community is fine for development; Enterprise if license is
+  available).
+- PostgreSQL 16 with the pgvector extension.
+- Python 3.11 for both Odoo and the orchestrator.
+- FastAPI for the orchestrator service.
+- Redis for sessions, rate limits, background jobs.
+- LLM providers: OpenAI (default cloud), Anthropic (alternate), Ollama
+  (local). Use LiteLLM-style routing.
+- Embeddings: text-embedding-3-small for cloud, bge-m3 for local.
+- Frontend: Odoo's OWL 2 framework for the chat widget.
+- Containers: Docker Compose for development. Provide a Helm chart skeleton
+  for production but do not flesh it out yet.
+- Observability: structured JSON logs, OpenTelemetry traces, Prometheus
+  metrics endpoints.
+
+REPOSITORY LAYOUT TO CREATE
+Propose this layout, then create it after I approve:
+
+  /odoo-ai-brain
+    /addons
+      /ai_brain                   # our custom Odoo module
+      /vendor/odoo-llm            # git submodule of apexive/odoo-llm
+    /orchestrator                 # FastAPI service
+      /app
+        /agents
+        /tools
+        /memory
+        /providers
+        /security
+        /api
+      /tests
+      pyproject.toml
+      Dockerfile
+    /infra
+      docker-compose.yml
+      /nginx
+      /helm                       # skeleton only for now
+    /docs
+      ARCHITECTURE.md
+      RUNBOOK.md
+      TOOL_REGISTRY.md
+      PROMPTS.md
+      EVALUATIONS.md
+    /scripts
+      bootstrap.sh
+      seed_demo.py
+      reindex.py
+    .env.example
+    README.md
+    Makefile
+
+WORKING METHOD
+- After reading this brief, produce a written plan for Milestone 1 only
+  and wait for my approval before writing any code.
+- For every milestone: write code, write tests, run the tests, then stop
+  and summarize. Do not start the next milestone unless I tell you to.
+- Use conventional commits. Open a feature branch per milestone.
+- When you need a secret (API key, Odoo Enterprise key), tell me which
+  variable to set in .env and stop. Never embed secrets in code.
+- When you make a non-obvious technical decision, write a short ADR
+  (architecture decision record) under /docs/adr/ explaining why.
+- If you are uncertain about a requirement, ask one focused question
+  before assuming.
+
+MILESTONES (work through them in order)
+
+M1 — Foundation and walking skeleton
+  - docker-compose with: odoo:19, postgres:16 with pgvector, redis,
+    orchestrator (FastAPI hello-world), nginx reverse proxy.
+  - Makefile targets: up, down, logs, shell-odoo, shell-orch, test.
+  - Empty ai_brain module with manifest, base security, and a placeholder
+    systray icon that opens an empty side panel.
+  - Health endpoint on the orchestrator + smoke test from Odoo to
+    orchestrator using a signed JWT.
+  - README explains how a developer runs it locally.
+  Acceptance: `make up` brings everything online; the systray icon is
+  visible in Odoo; orchestrator /health returns 200.
+
+M2 — Vendor integration and provider abstraction
+  - Add apexive/odoo-llm as a git submodule under /addons/vendor.
+  - Install llm, llm_assistant, llm_thread, llm_tool, llm_openai,
+    llm_ollama, llm_pgvector in the demo Odoo instance via a setup script.
+  - Configure one OpenAI provider and one Ollama provider.
+  - Verify a basic conversation works end-to-end through llm_assistant.
+  Acceptance: a developer can chat with both an OpenAI-backed and an
+  Ollama-backed assistant from inside Odoo.
+
+M3 — ai_brain chat panel (OWL widget)
+  - Replace the placeholder systray with a real OWL side panel:
+    conversation list, current thread, input box, context chip showing
+    the active record (res_model, res_id) when on a form view.
+  - Wire it to call llm_assistant under the hood (do not duplicate logic).
+  - Preserve conversation history per user across sessions.
+  Acceptance: user can hold a multi-turn conversation, navigate to a
+  customer record, and see the context chip update; switching
+  conversations works.
+
+M4 — Tool layer and audit log
+  - Define ai.tool.log model in ai_brain with full audit fields.
+  - Wrap the apexive tool execution path so every tool call writes an
+    audit entry (tool_name, args_json, result_json, latency_ms, success,
+    user_id, conversation_id).
+  - Implement an approval mechanism: tools declared as
+    requires_approval=True pause execution and surface an Approve/Reject
+    UI in the chat panel.
+  - Seed a small whitelist of safe read tools first
+    (search_records, read_record, list_views).
+  Acceptance: read tools work without approval; a stub write tool
+  triggers the approval UI and only executes after Approve is clicked;
+  every call appears in ai.tool.log.
+
+M5 — RAG / knowledge layer
+  - Use llm_knowledge + llm_pgvector for document RAG.
+  - Add an indexing job in ai_brain that walks selected models
+    (configurable: res.partner, product.template, account.move,
+    helpdesk.ticket by default), builds a textual representation, and
+    embeds them into ai.knowledge.chunk.
+  - Triggered re-index on record write via ir.actions.server, plus a
+    nightly full reconciliation job.
+  - Add a `semantic_search` tool to the AI's catalogue.
+  Acceptance: AI can answer "find customers in Berlin who bought product
+  X last quarter" by combining structured search and semantic search.
+
+M6 — Security hardening
+  - JWT issuance from Odoo to orchestrator, short-lived, signed.
+  - Field redaction layer in the orchestrator with a config file listing
+    sensitive fields per model.
+  - Per-user, per-tool rate limits in Redis.
+  - Private-mode tenant flag that forces Ollama-only routing.
+  - Prompt-injection mitigation: wrap all record-derived text in
+    untrusted-content delimiters in the system prompt.
+  Acceptance: redaction unit tests pass; flipping private-mode disables
+  all OpenAI calls verifiably; rate limit returns a clean 429 to the UI.
+
+M7 — Domain agents (first vertical: accounting)
+  - Install Apexive's llm_tool_account.
+  - Build a "Reconciliation Assistant" agent in the AI app: system prompt,
+    topics for "match bank lines to bills", "explain partner balance
+    discrepancy", "draft journal entry from receipt".
+  - Add an "Ask AI" button on account.bank.statement form view that
+    pre-fills the prompt with the statement context.
+  Acceptance: end-to-end demo: load a sample statement, click Ask AI,
+  the agent proposes matches, user approves, journals are drafted.
+
+M8 — Observability and evaluations
+  - Structured JSON logs across orchestrator and ai_brain controllers.
+  - OpenTelemetry tracing of the full request flow.
+  - Prometheus metrics: tokens in/out per provider, tool latency, cost
+    estimate per user.
+  - Evaluation harness: 30+ golden tasks with expected tool calls and
+    expected answers, runnable via `make eval`.
+  Acceptance: a Grafana dashboard JSON is provided; `make eval` runs and
+  reports pass/fail with diff against expectations.
+
+M9 — Documentation and pilot prep
+  - Fill out ARCHITECTURE.md, RUNBOOK.md, TOOL_REGISTRY.md, PROMPTS.md,
+    EVALUATIONS.md.
+  - Admin guide: configuring providers, budgets, redaction, private mode.
+  - User guide per role (sales, accounting, inventory) with screenshots.
+  - Onboarding tour inside Odoo via the web_tour framework.
+  Acceptance: a new developer can clone the repo and reach M1 acceptance
+  using only the README; an admin can configure a new provider using
+  only the admin guide.
+
+FIRST RESPONSE
+Do NOT start coding yet. Your first response should:
+  1. Confirm you understand the goal and constraints in your own words.
+  2. List any assumptions you are making.
+  3. Ask up to three clarifying questions if needed.
+  4. Produce a detailed plan for Milestone 1 only, including file tree,
+     dependencies, exact commands you will run, and how I will verify it.
+Wait for my approval before creating any files.
+
+===== END BRIEF =====</code></pre>
+</div>
+
+<div class="callout ok">
+<strong>Tip:</strong> If Claude Code's first response looks reasonable, reply simply with "Approved, proceed with Milestone 1." If something is off, push back specifically — for example, "Use Anthropic Claude as the default provider instead of OpenAI" — and let it revise the plan.
+</div>
+</section>
+
+<!-- =============================================================== -->
+<!-- PART 4 — DETAILED TECHNICAL SPEC                                -->
+<!-- =============================================================== -->
+<section id="part4">
+<h2>Part 4 · Detailed technical specification</h2>
+
+<p>This part is for engineers and Claude Code itself. It expands on the brief.</p>
+
+<h3>4.1 System diagram</h3>
+<div class="ascii">┌──────────────────────────────────────────────────────────────┐
+│  USER  ·  Browser (Odoo Web Client + AI Chat Side Panel)     │
+└────────────────────────────┬─────────────────────────────────┘
+                             │  WebSocket / JSON-RPC
+┌────────────────────────────▼─────────────────────────────────┐
+│  ODOO 19  (Web Server · OWL Frontend · ORM · PostgreSQL)     │
+│  ├── Native AI app (productivity.ai)                         │
+│  ├── Apexive odoo-llm modules (llm, llm_assistant, ...)      │
+│  └── Custom module: ai_brain (chat widget, audit, approval)  │
+└────────────────────────────┬─────────────────────────────────┘
+                             │  Internal HTTPS (signed JWT)
+┌────────────────────────────▼─────────────────────────────────┐
+│  ORCHESTRATOR  (FastAPI · same VPC)                          │
+│  ├── LLM router (OpenAI · Anthropic · Ollama)                │
+│  ├── Tool executor → Odoo JSON-RPC as user                   │
+│  ├── Redaction + guardrails                                  │
+│  └── MCP server endpoint (optional, for Claude Desktop etc.) │
+└──────┬──────────────────────────────────────┬────────────────┘
+       │                                      │
+┌──────▼──────────────┐               ┌───────▼────────────────┐
+│  PostgreSQL +       │               │  LLM PROVIDERS         │
+│  pgvector           │               │  OpenAI / Anthropic /  │
+│  (shared with Odoo) │               │  Ollama                │
+└─────────────────────┘               └────────────────────────┘</div>
+
+<h3>4.2 Custom module <code>ai_brain</code> — models</h3>
+<pre><code># addons/ai_brain/models/
+
+ai.conversation
+  user_id (res.users)
+  title
+  started_at, last_active_at
+  message_count
+
+ai.message
+  conversation_id
+  role (user|assistant|tool|system)
+  content
+  tool_calls_json
+  tokens_in, tokens_out
+  model_used
+  created_at
+
+ai.tool.log
+  message_id
+  tool_name
+  args_json
+  result_json
+  success (bool)
+  latency_ms
+  approved_by (res.users, nullable)
+  origin_ip
+
+ai.knowledge.chunk
+  res_model, res_id
+  source_field
+  text
+  embedding (VECTOR(1536))
+  version
+  updated_at
+
+ai.policy
+  name
+  scope_models (m2m to ir.model)
+  allow_write (bool)
+  requires_approval (bool)
+  max_records_per_call
+  redact_fields_json</code></pre>
+
+<h3>4.3 Tool registry contract</h3>
+<p>Every tool exposed to the AI must declare:</p>
+<table>
+  <thead><tr><th>Field</th><th>Purpose</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>Unique stable identifier, e.g. <code>account.reconcile_proposal</code>.</td></tr>
+    <tr><td><code>description</code></td><td>Plain English; the LLM uses this to decide when to call it.</td></tr>
+    <tr><td><code>input_schema</code></td><td>JSON Schema for arguments. Strict validation; reject extra fields.</td></tr>
+    <tr><td><code>output_schema</code></td><td>JSON Schema for the result.</td></tr>
+    <tr><td><code>required_groups</code></td><td>Odoo groups the calling user must belong to.</td></tr>
+    <tr><td><code>requires_approval</code></td><td>If true, execution pauses and surfaces an Approve/Reject in the chat.</td></tr>
+    <tr><td><code>side_effects</code></td><td><code>none</code> | <code>read</code> | <code>write</code> | <code>external</code>.</td></tr>
+    <tr><td><code>rate_limit</code></td><td>Calls per minute per user.</td></tr>
+  </tbody>
+</table>
+
+<h3>4.4 Request flow (canonical)</h3>
+<ol>
+  <li>User types in the chat panel; Odoo controller <code>/ai_brain/chat</code> persists an <code>ai.message</code> and issues a JWT.</li>
+  <li>Orchestrator receives prompt + JWT + context (res_model, res_id).</li>
+  <li>Orchestrator loads conversation history and runs RAG to fetch relevant chunks.</li>
+  <li>LLM is called in a planning loop (ReAct): Thought → Action (tool call) → Observation → repeat, capped at 8 steps.</li>
+  <li>Each tool call goes through Odoo JSON-RPC as the user; redacted fields are stripped before payloads leave the orchestrator.</li>
+  <li>Write tools tagged <code>requires_approval</code> stream a pending approval card to the UI; user clicks Approve to resume.</li>
+  <li>Final natural-language answer streams back to the chat. <code>ai.tool.log</code> entries are written for every step.</li>
+</ol>
+
+<h3>4.5 Environment variables (<code>.env.example</code>)</h3>
+<pre><code># Odoo
+ODOO_VERSION=19.0
+ODOO_DB_NAME=ai_brain_dev
+ODOO_ADMIN_PASSWORD=change_me
+
+# Postgres
+POSTGRES_USER=odoo
+POSTGRES_PASSWORD=odoo
+POSTGRES_DB=postgres
+
+# Orchestrator
+ORCH_PORT=8088
+ORCH_JWT_SECRET=change_me_64_chars
+ORCH_REDIS_URL=redis://redis:6379/0
+
+# LLM providers
+OPENAI_API_KEY=
+ANTHROPIC_API_KEY=
+OLLAMA_BASE_URL=http://ollama:11434
+
+# Modes
+PRIVATE_MODE=false       # true = local LLM only
+DEFAULT_MODEL=gpt-4o-mini
+LOCAL_MODEL=qwen2.5:7b</code></pre>
+</section>
+
+<!-- =============================================================== -->
+<!-- PART 5 — BUILD SEQUENCE                                          -->
+<!-- =============================================================== -->
+<section id="part5">
+<h2>Part 5 · Build sequence (week-by-week)</h2>
+
+<table>
+  <thead><tr><th>Week</th><th>Milestone</th><th>What "done" looks like</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>M1 Foundation</td><td>Stack runs locally with one command; chat icon visible.</td></tr>
+    <tr><td>2</td><td>M2 Vendor integration</td><td>Both OpenAI and Ollama assistants reply in Odoo.</td></tr>
+    <tr><td>3–4</td><td>M3 Chat panel UX</td><td>Context-aware side panel, persistent conversations.</td></tr>
+    <tr><td>5–6</td><td>M4 Tools + audit + approvals</td><td>Approval UI works; full audit trail visible.</td></tr>
+    <tr><td>7–8</td><td>M5 RAG / indexing</td><td>Semantic search across selected Odoo models.</td></tr>
+    <tr><td>9–10</td><td>M6 Security hardening</td><td>Redaction, rate limits, private mode all verifiable.</td></tr>
+    <tr><td>11–13</td><td>M7 Accounting agent</td><td>End-to-end reconciliation demo.</td></tr>
+    <tr><td>14–15</td><td>M8 Observability + evals</td><td>Grafana dashboard live; <code>make eval</code> green.</td></tr>
+    <tr><td>16–18</td><td>M9 Docs + pilot</td><td>One department onboarded in production.</td></tr>
+    <tr><td>19–24</td><td>Rollout</td><td>Org-wide deployment, training, support runbook in use.</td></tr>
+  </tbody>
+</table>
+</section>
+
+<!-- =============================================================== -->
+<!-- PART 6 — ACCEPTANCE CHECKLIST                                    -->
+<!-- =============================================================== -->
+<section id="part6">
+<h2>Part 6 · Acceptance checklist</h2>
+
+<p>Before we declare the project ready for production, every item on this list must be true.</p>
+
+<h3>Functional</h3>
+<ul>
+  <li>Chat panel available on every Odoo screen for authenticated users.</li>
+  <li>AI can answer questions across at least Sales, Accounting, Inventory, Helpdesk.</li>
+  <li>Approval flow works for all write tools.</li>
+  <li>Conversation history persists per user and is searchable.</li>
+  <li>RAG returns sources (record links) with every answer that uses them.</li>
+  <li>UI language matches the user's Odoo language setting.</li>
+</ul>
+
+<h3>Security</h3>
+<ul>
+  <li>Penetration test passed (prompt injection, IDOR, JWT replay, rate limit bypass).</li>
+  <li>Redaction unit tests cover every sensitive field configured.</li>
+  <li>Private mode verifiably blocks all external LLM calls.</li>
+  <li>Every AI write is tagged with <code>x_ai_origin</code> and a revert tool exists.</li>
+</ul>
+
+<h3>Operational</h3>
+<ul>
+  <li>Grafana dashboard shows tokens, costs, latency, errors per provider and per user.</li>
+  <li>Runbook covers: provider outage, rate-limit storm, bad prompt template, vector store rebuild.</li>
+  <li>Backup and restore tested for both Odoo DB and vector data.</li>
+  <li><code>make eval</code> passes ≥ 95% of the golden task set.</li>
+</ul>
+
+<h3>Documentation</h3>
+<ul>
+  <li>README lets a fresh developer reach M1 acceptance unaided.</li>
+  <li>User playbooks exist per role with screenshots.</li>
+  <li>Tool registry document is current and matches code.</li>
+  <li>At least 3 short training videos recorded for end users.</li>
+</ul>
+</section>
+
+<hr />
+
+<footer>
+  <p>This kickoff document is the single source of truth for starting the project. If the brief in Part 3 and the spec in Part 4 disagree, the spec wins — update the brief and re-paste it.</p>
+  <p>End of document · Odoo + AI Brain Kickoff v1.0</p>
+</footer>
+
+</div>
+</body>
+</html>

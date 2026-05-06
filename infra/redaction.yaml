@@ -1,0 +1,21 @@
+# Field redaction configuration (E6).
+# Sensitive fields listed here are stripped from record payloads before
+# they leave the orchestrator for any external LLM provider.
+# Redaction does NOT apply to prod-local (Ollama) routes.
+# Format: model_name -> list of field names (dot notation for nested fields)
+redacted_fields:
+  hr.employee:
+    - salary
+    - wage
+    - private_bank_account_id
+  res.partner:
+    - bank_ids.acc_number
+    - vat
+  res.users:
+    - password
+    - login
+  account.move:
+    - payment_reference
+    - invoice_payment_ref
+  account.bank.statement.line:
+    - partner_bank_id.acc_number
