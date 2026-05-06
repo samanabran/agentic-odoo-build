@@ -1,185 +1,129 @@
 # ADR 0006 — M2 Spike: Apexive odoo-llm on Odoo 19 Compatibility
 
 **Date:** 2026-05-06
-**Status:** Accepted (static analysis complete; live install pending Docker)
-**Branch:** m1-foundation (spike is read-only; no production code written)
+**Status:** Accepted — FINAL (live install test complete)
+**Branch:** m1-foundation (spike read-only; no production code written)
 
 ---
 
 ## Method
 
 Static analysis of the pinned submodule at SHA
-`1ede75911bd4565a7f544be06e31a651f9d63cf7` (18.0 branch, 2026-05-01).
-Live install test could not run because Docker Desktop was not running at
-spike time. This ADR documents everything determinable from source reading
-and flags what requires live validation. The live test must be run before
-M2 scope is locked.
+`1ede75911bd4565a7f544be06e31a651f9d63cf7` (18.0 branch, 2026-05-01),
+followed by a live install test on a fresh `odoo:19.0` container with
+Python packages pre-installed.
 
 ---
 
-## Module inventory check
-
-All 9 required modules from B1 Tier 2 are present in the submodule.
-
----
-
-## Finding 1 — CERTAIN: Three hidden transitive dependencies (install list correction)
-
-The B1 Tier 2 install list is **incomplete**. Three modules not in the list
-are **required** by modules that are:
-
-| Missing module | Required by | In vendor repo |
-|---|---|---|
-| `llm_store` | `llm_knowledge`, `llm_pgvector` | yes |
-| `llm_training` | `llm_openai` | yes |
-| `web_json_editor` | `llm_assistant` | yes |
-
-**Corrected install order** (transitive deps resolved):
-
-```
-1.  llm
-2.  llm_store          <- ADD
-3.  llm_training       <- ADD
-4.  web_json_editor    <- ADD
-5.  llm_tool
-6.  llm_thread
-7.  llm_assistant
-8.  llm_openai
-9.  llm_ollama
-10. llm_knowledge
-11. llm_pgvector
-12. llm_tool_knowledge
-```
-
-Without these three, Odoo will refuse to install `llm_openai`, `llm_knowledge`,
-and `llm_pgvector` with a dependency error before any Odoo 19 compatibility
-question arises.
-
----
-
-## Finding 2 — CERTAIN: Custom Odoo Dockerfile required (Python packages)
-
-The base `odoo:19.0` image does not include the following packages declared
-via `external_dependencies.python`:
-
-| Package | Required by |
-|---|---|
-| `emoji`, `markdown2` | llm_thread |
-| `pydantic>=2.0.0`, `mcp` | llm_tool |
-| `jinja2`, `jsonschema` | llm_assistant |
-| `openai` | llm_openai |
-| `ollama` | llm_ollama |
-| `pgvector`, `numpy` | llm_pgvector |
-| `markdownify`, `PyMuPDF`, `numpy` | llm_knowledge |
-
-Odoo checks `external_dependencies.python` at install time and blocks
-installation if a package is not importable.
-
-**Resolution (M2 deliverable):** Add `infra/odoo/Dockerfile` extending
-`odoo:19.0` with a single `RUN pip install ...` layer.
-
----
-
-## Finding 3 — LOW RISK: t-esc deprecation (30+ instances, not a blocker)
-
-`t-esc` appears in 30+ QWeb template locations across `llm_thread`,
-`llm_generate`, and `llm_assistant`. Odoo 19 supports `t-esc` but deprecates
-it in favour of `t-out`. Templates render correctly; no installation failure.
-Deprecation warnings may appear in logs. Not a blocker; can be suppressed
-with `ai_brain` template overrides if needed.
-
----
-
-## Finding 4 — MODERATE RISK: llm_thread patches Odoo 19 mail OWL components
-
-`llm_thread` patches five core mail components via `patch()`:
-
-| File | Target |
-|---|---|
-| `composer_patch.js` | `Composer.prototype` from `@mail/core/common/composer` |
-| `thread_patch.js` | `Thread.prototype` from `@mail/core/common/thread_model` |
-| `thread_model_patch.js` | `Thread.prototype` (URL routing extension) |
-| `chatter_patch.js` | chatter component |
-| `message_patch.js` | message component |
-
-The `patch()` API is stable (OWL 2). The `Composer` patch wraps its
-`useService("llm.store")` in `try/catch` for graceful degradation.
-
-**Risk:** If Odoo 19 changed method signatures inside `Thread.prototype` or
-`Composer.prototype.setup()`, patches could silently mis-apply or throw at
-runtime. Cannot be determined from source reading alone.
-
-**Assessment:** This is the primary unknown requiring live validation.
-
----
-
-## Finding 5 — CLEAN: llm_pgvector pre_init_hook
-
-The hook calls `CREATE EXTENSION IF NOT EXISTS vector` and verifies the
-type with a test query. Our `pgvector/pgvector:pg16` image has pgvector
-pre-installed. The hook's `IF NOT EXISTS` guard means it will log "already
-installed" and continue cleanly.
-
----
-
-## Finding 6 — CLEAN: No deprecated ORM patterns
-
-- `@api.multi` — not found
-- OWL 1 legacy patterns (`patchMap`, `Component.env`, `LegacyComponent`) — not found
-- The 18->19 ORM delta is incremental, not structural
-
----
-
-## Live install validation (pending Docker Desktop start)
-
-Command to run once Docker is available:
+## Live install test — command run
 
 ```bash
-make up
-# inside Odoo container after startup:
-pip install emoji markdown2 "pydantic>=2.0.0" mcp jinja2 jsonschema \
-    openai ollama pgvector numpy markdownify PyMuPDF
-odoo -c /etc/odoo/odoo.conf \
-    -i llm,llm_store,llm_training,web_json_editor,llm_tool,llm_thread,\
+docker exec infra-odoo-1 odoo \
+  --addons-path="/mnt/extra-addons,/mnt/extra-addons/vendor/odoo-llm" \
+  -d spike_test --db_host=db --db_port=5432 --db_user=odoo --db_password=odoo \
+  -i llm,llm_store,llm_training,web_json_editor,llm_tool,llm_thread,\
 llm_assistant,llm_openai,llm_ollama,llm_knowledge,llm_pgvector,llm_tool_knowledge \
-    --stop-after-init 2>&1 | tee /tmp/m2_spike.log
+  --stop-after-init --no-http
 ```
 
-Update this ADR with the per-module results (installs cleanly / warnings /
-failure + stack trace) before M2 scope is committed.
-
 ---
 
-## Preliminary recommendation
+## Finding 1 — BLOCKER: Odoo 19 version check rejects ALL 18.0 modules
 
-**Yellow path — pending live confirmation.**
+**Status per module (live test):**
 
-Two issues are certain and have clear, bounded resolutions:
-- Install list corrected (+3 transitive modules: `llm_store`, `llm_training`, `web_json_editor`)
-- Custom Odoo Dockerfile required (pip layer, M2 deliverable)
-
-One issue is a moderate unknown that live testing will resolve:
-- `llm_thread` frontend patches against Odoo 19 mail OWL components
-
-If live validation shows frontend patches apply cleanly: upgrade to **Green**
-path, M2 proceeds as planned (~1 week).
-
-If patches require `ai_brain` OWL overrides: stays **Yellow**, M2 grows to
-~2 weeks.
-
-Static analysis gives no signal for a Red path. Modules `llm`, `llm_thread`,
-and `llm_assistant` have clean ORM with no Odoo 19 structural incompatibilities
-visible from source. The 18->19 delta is incremental as expected per ADR 0004.
-
----
-
-## Decision
-
-**Pending live validation.** Update the recommendation above once the live
-install test is run.
-
-| Scenario | Path | M2 estimate |
+| Module | Result | Odoo 19 log |
 |---|---|---|
-| All 12 install + patches apply cleanly | Green | ~1 week |
-| 1-3 frontend patch failures, fixable in ai_brain | Yellow | ~2 weeks |
-| llm / llm_thread / llm_assistant fail at ORM level | Red | revisit ADR 0004 |
+| llm | BLOCKED | incompatible version, setting installable=False |
+| llm_store | BLOCKED | incompatible version, setting installable=False |
+| llm_training | BLOCKED | incompatible version, setting installable=False |
+| web_json_editor | BLOCKED | incompatible version, setting installable=False |
+| llm_tool | BLOCKED | incompatible version, setting installable=False |
+| llm_thread | BLOCKED | incompatible version, setting installable=False |
+| llm_assistant | BLOCKED | incompatible version, setting installable=False |
+| llm_openai | BLOCKED | incompatible version, setting installable=False |
+| llm_ollama | BLOCKED | incompatible version, setting installable=False |
+| llm_knowledge | BLOCKED | incompatible version, setting installable=False |
+| llm_pgvector | BLOCKED | incompatible version, setting installable=False |
+| llm_tool_knowledge | BLOCKED | incompatible version, setting installable=False |
+
+**Root cause — `check_version()` in `odoo/modules/module.py`:**
+
+```python
+def check_version(version, should_raise=True):
+    version = adapt_version(version)
+    serie = release.major_version  # "19.0" on Odoo 19
+    if version.startswith(serie + '.'):
+        return True
+    return False
+
+# Called at manifest load time:
+if manifest['installable'] and not check_version(manifest['version'], should_raise=False):
+    manifest['installable'] = False  # HARD BLOCK — no override path
+```
+
+All vendor modules carry version strings of the form `18.0.x.y.z`.
+Odoo 19 requires `19.0.x.y.z`. The check runs before any add-on code
+executes, so there is no monkey-patch path via `ai_brain/__init__.py`.
+There is no CLI flag to bypass this check. There is no inheritance
+mechanism to override a module's manifest version.
+
+**The B2 zero-diff constraint prevents us from changing vendor manifests
+in place. This is a structural hard block, not a compatibility warning.**
+
+---
+
+## Finding 2 — CERTAIN (static, unblocked by live test)
+
+Three transitive deps must be added to the install list regardless of
+which Odoo version is used:
+- `llm_store` (required by llm_knowledge, llm_pgvector)
+- `llm_training` (required by llm_openai)
+- `web_json_editor` (required by llm_assistant)
+
+All three are in the vendor repo.
+
+---
+
+## Finding 3 — Odoo Python setup note
+
+The `odoo:19.0` base image uses system-managed Python (PEP 668).
+Installing packages requires `pip install --break-system-packages`.
+This must be handled by a custom Dockerfile in M2 regardless of which
+Odoo version is chosen.
+
+---
+
+## Decision — RED PATH
+
+All 9 required modules (including the three critical ones: `llm`,
+`llm_thread`, `llm_assistant`) fail to install on Odoo 19 due to the
+version string enforcement introduced in Odoo 19.
+
+**Recommended action per ADR 0005 rollback plan:**
+
+> If a hard blocker is discovered... the fallback is:
+> 1. Change `odoo` image from `odoo:19.0` to `odoo:18.0`.
+> 2. Update `addons/ai_brain/__manifest__.py` version prefix from
+>    `19.0` to `18.0`.
+> 3. Update this ADR to reflect the downgrade.
+> 4. Notify the project owner; document the blocking issue.
+
+**The rollback is a one-commit change.** It does not affect the
+orchestrator, LiteLLM, Redis, or any infrastructure outside the Odoo
+container.
+
+**Alternative (do NOT pursue without explicit owner decision):**
+Fork all 9 vendor modules, bump version strings to `19.0.x.y.z`, and
+open upstream PRs. This scopes a real M2.5 porting milestone (~3–4
+weeks), requires ADR 0002b, and carries unknown frontend patch risk.
+
+---
+
+## Recommendation to project owner
+
+Downgrade to Odoo 18 Community (one commit) and proceed with M2 as
+planned. The vendor modules are actively maintained on the 18.0 branch.
+Odoo 18 is supported until October 2027. The upgrade to Odoo 19 can be
+revisited once Apexive publishes an official 19.0 branch (which they
+announced but have not shipped 5+ months later).
