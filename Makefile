@@ -1,4 +1,4 @@
-COMPOSE         = docker compose -f infra/docker-compose.yml
+COMPOSE         = docker compose --env-file .env -f infra/docker-compose.yml
 ODOO_CONTAINER  = $(shell docker ps -qf "name=odoo")
 ORCH_CONTAINER  = $(shell docker ps -qf "name=orchestrator")
 DB_CONTAINER    = $(shell docker ps -qf "name=db")
