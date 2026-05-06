@@ -1,0 +1,18 @@
+# CODEOWNERS — route reviews automatically
+# Last column is the required reviewer (GitHub username).
+# Replace samanabran with the actual owner login if different.
+
+# Catch-all: every PR needs the owner
+*                           @samanabran
+
+# Vendor submodule — any change here is a B2 zero-diff violation; needs human eyes
+/addons/vendor/             @samanabran
+
+# ADRs — architectural decisions need human review, not just CI
+/docs/adr/                  @samanabran
+
+# Infrastructure changes affect all environments
+/infra/                     @samanabran
+
+# Secrets and env config
+/.env.example               @samanabran

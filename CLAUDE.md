@@ -29,6 +29,8 @@ Never start the next milestone without explicit human approval. Never silently r
 
 **A1. Tests before merge.** `make test` must be green. `make eval` must not regress vs main.
 
+**A1. Merge strategy: Squash and merge.** Every PR lands as a single commit on `main`. This keeps the log readable and makes `git bisect` useful. Set in repo Settings → General → Pull Requests → Allow squash merging (only).
+
 **A1. ADR for every non-obvious decision.** File in `docs/adr/`, numbered sequentially. Required when choosing between two or more reasonable options.
 
 **A2. Secrets.** Never embed in code, config, commits, logs, or chat. All secrets in `.env` (gitignored), placeholders in `.env.example`. When a secret is needed: stop, name the variable and why, wait. Do not invent fake-but-valid-looking keys. gitleaks pre-commit hook blocks offending commits.
