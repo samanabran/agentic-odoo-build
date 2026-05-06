@@ -48,7 +48,7 @@ Never start the next milestone without explicit human approval. Never silently r
 ### Tier 1 — Docker images (M1)
 | Image | Service |
 |---|---|
-| `odoo:19.0` | odoo |
+| `odoo:18.0` | odoo |
 | `pgvector/pgvector:pg16` | db |
 | `redis:7-alpine` | redis |
 | `ghcr.io/berriai/litellm:main-stable` | litellm |
@@ -82,9 +82,9 @@ SHA changes require an ADR update (0002) and a "vendor bump" PR separate from fe
 
 ## Section C — Odoo version (locked)
 
-**Odoo 19 Community Edition** (`odoo:19.0`). Chosen by the project owner 2026-05-06 (ADR 0004, ADR 0005).
+**Odoo 18 Community Edition** (`odoo:18.0`). Downgraded from Odoo 19 on 2026-05-06 after M2 spike confirmed hard version-check block (ADR 0006). See ADR 0007 for image digest pin.
 
-Rollback path if a hard blocker is discovered: swap `odoo:19.0` → `odoo:18.0` in docker-compose, update manifest version prefix. One-commit change. See ADR 0005.
+Original Odoo 19 rollback has been executed. See ADR 0006 (spike) and ADR 0007 (image pin) for details. To upgrade back to Odoo 19: update docker-compose image, manifest prefix, and vendor pin once Apexive publishes a 19.0 branch.
 
 ---
 

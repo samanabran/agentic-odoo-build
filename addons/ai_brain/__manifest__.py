@@ -1,6 +1,6 @@
 {
     "name": "AI Brain",
-    "version": "19.0.1.0.0",
+    "version": "18.0.1.0.0",
     "summary": "In-app AI assistant — chat panel, audit log, approval flow, and RAG",
     "author": "AI Brain Project",
     "category": "Productivity",

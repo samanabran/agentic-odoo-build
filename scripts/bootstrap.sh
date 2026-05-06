@@ -21,7 +21,7 @@ fi
 
 echo ""
 echo "--- Pulling Docker images ---"
-docker pull odoo:19.0
+docker pull odoo:18.0
 docker pull pgvector/pgvector:pg16
 docker pull ollama/ollama:latest
 docker pull ghcr.io/berriai/litellm:main-stable
