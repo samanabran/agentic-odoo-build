@@ -6,7 +6,9 @@ from fastapi import FastAPI
 from prometheus_client import Counter, Histogram, make_asgi_app
 
 from app.api.admin import router as admin_router
+from app.api.chat import router as chat_router
 from app.api.health import router as health_router
+from app.config import _assert_no_github_models_in_production, get_active_model
 
 logger = structlog.get_logger()
 
@@ -40,64 +42,6 @@ tool_latency_seconds = Histogram(
 )
 rag_queries_total = Counter("rag_queries_total", "RAG queries executed")
 rag_latency_seconds = Histogram("rag_latency_seconds", "RAG query latency in seconds")
-
-# ---------------------------------------------------------------------------
-# Routing (D3) and production guard (D4)
-# ---------------------------------------------------------------------------
-_GITHUB_MODEL_PREFIXES = ("github/", "github-")
-
-
-def get_active_model() -> str:
-    """
-    Return the LiteLLM virtual model name for the current environment (D3).
-
-    Routing rules (evaluated in order):
-      PRIVATE_MODE=true         -> prod-local
-      ENVIRONMENT=production    -> prod-default
-      ENVIRONMENT=development   -> github-dev
-      anything else             -> RuntimeError
-    """
-    private_mode = os.getenv("PRIVATE_MODE", "false").lower() == "true"
-    environment = os.getenv("ENVIRONMENT", "").lower()
-
-    if private_mode:
-        return "prod-local"
-    if environment == "production":
-        return "prod-default"
-    if environment == "development":
-        return "github-dev"
-    raise RuntimeError(
-        f"ENVIRONMENT='{os.getenv('ENVIRONMENT', '')}' is not a recognised value. "
-        "Valid values: 'production', 'development'. "
-        "Set ENVIRONMENT in your .env file. PRIVATE_MODE=true overrides this check."
-    )
-
-
-def _assert_no_github_models_in_production() -> None:
-    """
-    Startup guard (D4, D7): hard-fail if production is configured to route
-    to a GitHub Models endpoint. This is a RuntimeError, not a warning.
-    """
-    environment = os.getenv("ENVIRONMENT", "").lower()
-    if environment != "production":
-        return
-
-    default_model = os.getenv("DEFAULT_MODEL", "")
-    for prefix in _GITHUB_MODEL_PREFIXES:
-        if default_model.lower().startswith(prefix):
-            raise RuntimeError(
-                f"ENVIRONMENT=production but DEFAULT_MODEL='{default_model}' references a "
-                "GitHub Models endpoint. GitHub Models must not serve production traffic — "
-                "this violates the Copilot Product Specific Terms and risks account suspension. "
-                "Set DEFAULT_MODEL to a licensed provider: openai/*, anthropic/*, or ollama/*."
-            )
-
-    if os.getenv("GITHUB_TOKEN"):
-        logger.warning(
-            "github_token_set_in_production",
-            msg="GITHUB_TOKEN is present in production. "
-                "It will not be used for LLM routing but should be removed from this environment.",
-        )
 
 
 def _setup_telemetry(app: FastAPI) -> None:
@@ -152,4 +96,5 @@ app = FastAPI(
 
 app.include_router(health_router)
 app.include_router(admin_router)
+app.include_router(chat_router)
 app.mount("/metrics", make_asgi_app())
