@@ -123,7 +123,7 @@ def run() -> tuple[bool, bool, str]:
                     "groups_id": [[6, 0, []]],
                 }])
         except Exception as exc:
-            notes.append(f"(b) could not create probe user: {exc} — skipping field restriction check")
+            notes.append(f"(b) could not create probe user: {exc} — skipping (b)")
             probe_uid_created = None
 
     # --- (b) non-admin cannot read restricted fields ---
@@ -187,6 +187,8 @@ def run() -> tuple[bool, bool, str]:
     if failures:
         return False, False, "FAIL: " + "; ".join(failures)
     note_str = (" [" + "; ".join(notes) + "]") if notes else ""
-    return True, False, f"api_key restricted (admin=OK, non-admin=hidden); sudo path + header OK{note_str}"
+    msg = "api_key restricted (admin=OK, non-admin=hidden); sudo path + header OK"
+    return True, False, msg + note_str
+
 
 
