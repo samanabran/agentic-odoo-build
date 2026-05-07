@@ -250,6 +250,31 @@ M4 with its own risk register entry.
 
 ---
 
+## Live verification (PR #11, R2)
+
+`task_015_llm_thread_vendor_compat` (`addons/ai_brain/tests/test_classical_inheritance.py`)
+asserts six conditions, all green as of branch `feat/m3-r2-classical-inheritance-hooks`:
+
+1. `env['llm.thread']` resolves with `_name="llm.thread"`, `_table="llm_thread"` after
+   ai_brain extends. Classical `_inherit` confirmed — no new table created.
+2. Vendor `llm.thread` fields (`model`, `res_id`, `provider_id`, `model_id`, `user_id`,
+   `tool_ids`, `attachment_ids`, `active`) all remain present.
+3. Vendor `mail.message` fields (`llm_role`, `is_error`, `body_json`, `user_vote`) all
+   remain present.
+4. Vendor `mail.message` methods (`is_llm_*_message`, `get_llm_roles`,
+   `_get_*_attachments`, `_get_unsupported_attachments`) all remain callable.
+5. Token accounting fields (`token_count_input`, `token_count_output`, `total_cost_usd`)
+   are NOT present — confirms R2 stays scope-pure; R5/PR #15 will add them.
+6. Round-trip: `llm.thread.create({provider_id, model_id})` + `browse(id)` confirms
+   single-table inheritance (same id, same data, same table).
+
+Result: `0 failed, 0 error(s) of 6 tests` (Odoo 18.0-20260504, `ai_brain_dev` DB).
+
+`ai_brain.ai_conversation` and `ai_brain.ai_message` are intentionally empty classes;
+they exist as policy attachment points for R3 (JWT), R4 (context chip), R5 (token fields).
+
+---
+
 ## Cross-references
 
 | ADR | Relationship |

@@ -7,3 +7,6 @@ from . import llm_provider_usage   # M2 token-usage capture
 #   M4: ai.tool.log extended, ai.policy
 #   M5: ai.knowledge.chunk
 from . import llm_provider_override  # R1-C2: api_key field restriction
+# M3 R2: classical inheritance hooks for ai.conversation/ai.message (ADR 0013)
+from . import ai_conversation
+from . import ai_message
