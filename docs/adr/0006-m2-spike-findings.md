@@ -182,3 +182,13 @@ Both constraints are implemented and verified.
 | 013 | negative | vkey scope enforcement (allowed vs blocked model) |
 
 **ADR 0006 status: CLOSED.**
+
+---
+
+## Live verification (PR #9 — 2026-05-07)
+
+M2 R1 complete. Eval harness: 9 passed, 4 skipped, 0 failed
+(tasks 001, 002, 007, 008, 009, 010, 011, 012, 013).
+Provider records seeded in `ai_brain_dev` DB. LiteLLM virtual keys
+provisioned and scope-enforced. ADRs 0009, 0010, 0011, 0012 all
+have live-verification evidence appended. Status: **observed**.
