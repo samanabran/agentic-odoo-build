@@ -66,3 +66,20 @@ Initial infrastructure decisions before the first line of production code is wri
 - Joins between Odoo records and their chunk embeddings incur no network hop
 - pgvector with HNSW indexing on pg16 handles tens of millions of vectors — sufficient for our expected record count
 - Revisit if we exceed ~10 M chunks or require approximate-nearest-neighbour throughput beyond pg16's capability
+
+---
+
+## M3 reconciliation (PR #10, 2026-05-07)
+
+Between M1 and M2, the chat path was routed directly Odoo → LiteLLM via
+the vendor `llm_thread` controller (`/llm/thread/generate`), bypassing the
+orchestrator. This drifted from the intent of Decision 2 (line 41:
+"`PRIVATE_MODE=true` routing to Ollama requires no orchestrator code path
+changes" — implying orchestrator was always intended to be in the path).
+
+PR #10 (ADR 0013) corrects this drift: from M3 onward, the chat path goes
+through `/ai_brain/chat` → orchestrator → LiteLLM. Decision 2 ("orchestrator
+never calls providers directly") remains valid as written and is honored by
+the new orchestrator `/chat` endpoint, which calls LiteLLM — not provider
+SDKs directly. This note records the architectural state correction rather
+than superseding the original decision.
