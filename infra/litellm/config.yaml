@@ -1,33 +1,83 @@
 model_list:
-  # Production primary (D1) — Anthropic claude-haiku-4-5
-  # Pinned to exact release date for reproducibility.
+  # ── Production (D1) ────────────────────────────────────────────────────────
   - model_name: prod-default
     litellm_params:
       model: anthropic/claude-haiku-4-5-20251001
       api_key: os.environ/ANTHROPIC_API_KEY
 
-  # Production alternate (D1) — OpenAI gpt-4o-mini
   - model_name: prod-alternate
     litellm_params:
       model: openai/gpt-4o-mini
       api_key: os.environ/OPENAI_API_KEY
 
-  # Private mode — local Ollama (only available when `make up-private`)
+  # Private mode — local Ollama (only with `make up-private`)
   - model_name: prod-local
     litellm_params:
       model: ollama/qwen2.5:7b
       api_base: http://ollama:11434
 
-  # Development + eval harness default (D1, D5)
-  # Canonical GitHub Models endpoint per addendum D5.
-  # MUST NOT be selected when ENVIRONMENT=production (orchestrator enforces this).
-  # Copilot rate limit: 15 req/min, ~150-300 req/day on low-tier models.
-  # See docs/adr/0003-github-models-dev-only.md
+  # ── GitHub Models — dev + eval only (D1, D5, ADR 0003) ────────────────────
+  # MUST NOT be selected when ENVIRONMENT=production.
   - model_name: github-dev
     litellm_params:
       model: openai/gpt-4o-mini
       api_base: https://models.github.ai/inference
       api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: github-gpt4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: github-mistral
+    litellm_params:
+      model: mistral-ai/Mistral-small
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: github-llama
+    litellm_params:
+      model: meta/Meta-Llama-3.1-8B-Instruct
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  # ── Fallback providers ─────────────────────────────────────────────────────
+  - model_name: fallback-groq
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+
+  - model_name: fallback-mistral
+    litellm_params:
+      model: mistral/mistral-small-latest
+      api_key: os.environ/MISTRAL_API_KEY
+
+  # ── Task-specialised routing aliases ──────────────────────────────────────
+  - model_name: task-code
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: task-analysis
+    litellm_params:
+      model: mistral-ai/Mistral-small
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: task-summary
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+
+router_settings:
+  fallbacks:
+    - prod-default:  [prod-alternate, fallback-mistral, fallback-groq]
+    - github-dev:    [github-mistral, github-llama, fallback-groq, fallback-mistral]
+    - task-code:     [fallback-groq, fallback-mistral]
+    - task-analysis: [fallback-mistral, fallback-groq]
+    - task-summary:  [fallback-groq, fallback-mistral]
 
 litellm_settings:
   drop_params: true
@@ -36,5 +86,5 @@ litellm_settings:
   failure_callback: []
 
 general_settings:
-  master_key: os.environ/LITELLM_MASTER_KEY   # enables /key/generate endpoint (M2)
-  store_model_in_db: false                     # stateless; keys passed via env
+  master_key: os.environ/LITELLM_MASTER_KEY
+  store_model_in_db: false

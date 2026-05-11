@@ -23,10 +23,14 @@
     "data": [
         "security/ir.model.access.csv",
         "data/llm_providers.xml",
+        "views/auth_templates.xml",
     ],
     "assets": {
         "web.assets_backend": [
             "ai_brain/static/src/components/AiBrainPanel.js",
+        ],
+        "web.assets_frontend": [
+            "ai_brain/static/src/css/auth.css",
         ],
     },
     "installable": True,
