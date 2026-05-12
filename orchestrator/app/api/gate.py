@@ -43,7 +43,11 @@ async def chat_gate(
     except pyjwt.InvalidTokenError:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
-    token_user_id = int(claims["sub"])
+    try:
+        token_user_id = int(claims["sub"])
+    except (KeyError, TypeError, ValueError):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
     if token_user_id != body.user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
