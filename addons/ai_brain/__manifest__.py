@@ -23,11 +23,7 @@
     "data": [
         "security/ir.model.access.csv",
         "data/llm_providers.xml",
-<<<<<<< Updated upstream
-=======
         "templates/dashboard.xml",
-        "views/auth_templates.xml",
->>>>>>> Stashed changes
     ],
     "assets": {
         "web.assets_backend": [

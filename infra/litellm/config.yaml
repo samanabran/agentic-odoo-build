@@ -29,8 +29,6 @@ model_list:
       api_base: https://models.github.ai/inference
       api_key: os.environ/GITHUB_TOKEN
 
-<<<<<<< Updated upstream
-=======
   - model_name: github-gpt4o
     litellm_params:
       model: openai/gpt-4o
@@ -86,7 +84,6 @@ router_settings:
     - task-analysis: [fallback-mistral, fallback-groq]
     - task-summary:  [fallback-groq, fallback-mistral]
 
->>>>>>> Stashed changes
 litellm_settings:
   drop_params: true
   request_timeout: 60
