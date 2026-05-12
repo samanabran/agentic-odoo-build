@@ -2,6 +2,9 @@
 """Tests for AiBrainThreadController route intercept (ADR 0013, R1)."""
 from unittest.mock import MagicMock, patch
 
+import pytest
+
+pytest.importorskip("odoo")
 from odoo.tests.common import TransactionCase
 
 
