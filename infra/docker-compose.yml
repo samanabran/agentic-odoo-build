@@ -30,7 +30,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: odoo --addons-path=/mnt/extra-addons,/mnt/extra-addons/vendor/odoo-llm --dev=xml
+    command: odoo --addons-path=/mnt/extra-addons,/mnt/extra-addons/vendor/odoo-llm --dev=xml --db-filter=^ai_brain_dev$
     environment:
       HOST: db
       USER: ${POSTGRES_USER:-odoo}
@@ -84,6 +84,8 @@ services:
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
       LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      MISTRAL_API_KEY: ${MISTRAL_API_KEY:-}
       DATABASE_URL: postgresql://${POSTGRES_USER:-odoo}:${POSTGRES_PASSWORD:-odoo}@db:5432/litellm
       STORE_MODEL_IN_DB: "True"
     command: ["--config", "/app/config.yaml", "--port", "4000"]

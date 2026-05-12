@@ -76,7 +76,7 @@ async def _ensure_session(session: httpx.AsyncClient) -> int | None:
         session,
         "search",
         "account.bank.statement",
-        [[[]]],
+        [[]],
         {"limit": 1},
     )
     if not statement_ids:
@@ -86,7 +86,7 @@ async def _ensure_session(session: httpx.AsyncClient) -> int | None:
         session,
         "suggest_bank_reconciliation",
         "ai.brain.finance",
-        [int(statement_ids[0])],
+        [[], int(statement_ids[0])],
     )
     if isinstance(result, dict) and result.get("session_id"):
         return int(result.get("session_id"))
@@ -107,7 +107,7 @@ async def task_finance_report(client: httpx.AsyncClient, base_url: str) -> dict:
         client,
         "generate_reconciliation_report",
         "ai.brain.finance",
-        [session_id],
+        [[], session_id],
     )
     url = result.get("url") if isinstance(result, dict) else None
     if not url or "/web/content/" not in url:

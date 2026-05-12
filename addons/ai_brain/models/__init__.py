@@ -12,3 +12,4 @@ from . import ai_conversation as ai_conversation
 from . import ai_message as ai_message
 from . import ai_reconciliation as ai_reconciliation
 from . import ai_brain_finance as ai_brain_finance
+from . import res_partner as res_partner

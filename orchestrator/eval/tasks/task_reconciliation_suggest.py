@@ -88,7 +88,7 @@ async def task_reconciliation_suggest(client: httpx.AsyncClient, base_url: str) 
         client,
         "search",
         "account.bank.statement",
-        [[[]]],
+        [[]],
         {"limit": 1},
     )
     if not statement_ids:
@@ -98,7 +98,7 @@ async def task_reconciliation_suggest(client: httpx.AsyncClient, base_url: str) 
         client,
         "suggest_bank_reconciliation",
         "ai.brain.finance",
-        [int(statement_ids[0])],
+        [[], int(statement_ids[0])],
     )
     session_id = result.get("session_id") if isinstance(result, dict) else None
     if not session_id:

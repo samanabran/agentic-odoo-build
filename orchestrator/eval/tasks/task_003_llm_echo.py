@@ -22,9 +22,14 @@ def run() -> tuple[bool, bool, str]:
     if not os.getenv("GITHUB_TOKEN"):
         return False, True, "GITHUB_TOKEN not set"
 
+    vkey = os.getenv("LITELLM_VKEY_CLOUD_DEV", "")
+    if not vkey:
+        return False, True, "LITELLM_VKEY_CLOUD_DEV not set"
+
     try:
         r = httpx.post(
             f"{LITELLM_URL}/chat/completions",
+            headers={"Authorization": f"Bearer {vkey}"},
             json={
                 "model": "github-dev",
                 "messages": [{"role": "user", "content": PROMPT}],

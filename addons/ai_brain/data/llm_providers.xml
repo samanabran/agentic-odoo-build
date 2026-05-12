@@ -52,6 +52,57 @@
       <field name="default" eval="True"/>
     </record>
 
+    <!-- ── Production Mistral provider (native Mistral via LiteLLM) ────── -->
+
+    <record id="llm_provider_mistral" model="llm.provider">
+      <field name="name">litellm-mistral</field>
+      <field name="service">openai</field>
+      <field name="api_base">http://litellm:4000/v1</field>
+      <!-- Placeholder replaced by provision_litellm_keys.sh -->
+      <field name="api_key">sk-litellm-placeholder-mistral</field>
+    </record>
+
+    <record id="llm_model_prod_mistral" model="llm.model">
+      <field name="name">prod-mistral</field>
+      <field name="provider_id" ref="llm_provider_mistral"/>
+      <field name="model_use">chat</field>
+      <field name="default" eval="False"/>
+    </record>
+
+    <!-- ── Production Groq provider (high-speed inference via LiteLLM) ── -->
+
+    <record id="llm_provider_groq" model="llm.provider">
+      <field name="name">litellm-groq</field>
+      <field name="service">openai</field>
+      <field name="api_base">http://litellm:4000/v1</field>
+      <!-- Placeholder replaced by provision_litellm_keys.sh -->
+      <field name="api_key">sk-litellm-placeholder-groq</field>
+    </record>
+
+    <record id="llm_model_prod_groq" model="llm.model">
+      <field name="name">prod-groq</field>
+      <field name="provider_id" ref="llm_provider_groq"/>
+      <field name="model_use">chat</field>
+      <field name="default" eval="False"/>
+    </record>
+
+    <!-- ── Production OpenCode provider (OpenAI-compatible endpoint) ───── -->
+
+    <record id="llm_provider_opencode" model="llm.provider">
+      <field name="name">litellm-opencode</field>
+      <field name="service">openai</field>
+      <field name="api_base">http://litellm:4000/v1</field>
+      <!-- Placeholder replaced by provision_litellm_keys.sh -->
+      <field name="api_key">sk-litellm-placeholder-opencode</field>
+    </record>
+
+    <record id="llm_model_prod_opencode" model="llm.model">
+      <field name="name">prod-opencode</field>
+      <field name="provider_id" ref="llm_provider_opencode"/>
+      <field name="model_use">chat</field>
+      <field name="default" eval="False"/>
+    </record>
+
     <!-- ── Prompt templates ─────────────────────────────────────────────── -->
 
     <record id="llm_prompt_dev_assistant" model="llm.prompt">
@@ -70,6 +121,30 @@ You are running locally via Ollama — no external network calls are made.
 Do not reveal system configuration details to users.]]></field>
     </record>
 
+    <record id="llm_prompt_mistral_assistant" model="llm.prompt">
+      <field name="name">Mistral Production Assistant System Prompt</field>
+      <field name="format">text</field>
+      <field name="template"><![CDATA[You are a helpful assistant powered by Mistral AI. Respond concisely and accurately.
+You are running in production mode through LiteLLM.
+Do not reveal system configuration details to users.]]></field>
+    </record>
+
+    <record id="llm_prompt_groq_assistant" model="llm.prompt">
+      <field name="name">Groq Production Assistant System Prompt</field>
+      <field name="format">text</field>
+      <field name="template"><![CDATA[You are a fast, helpful assistant powered by Groq. Respond concisely and accurately.
+You are running in production mode through LiteLLM.
+Do not reveal system configuration details to users.]]></field>
+    </record>
+
+    <record id="llm_prompt_opencode_assistant" model="llm.prompt">
+      <field name="name">OpenCode Production Assistant System Prompt</field>
+      <field name="format">text</field>
+      <field name="template"><![CDATA[You are a helpful assistant. Respond concisely and accurately.
+You are running in production mode through LiteLLM.
+Do not reveal system configuration details to users.]]></field>
+    </record>
+
     <!-- ── Assistants ──────────────────────────────────────────────────── -->
 
     <record id="llm_assistant_dev" model="llm.assistant">
@@ -84,6 +159,27 @@ Do not reveal system configuration details to users.]]></field>
       <field name="provider_id" ref="llm_provider_local"/>
       <field name="model_id" ref="llm_model_prod_local"/>
       <field name="prompt_id" ref="llm_prompt_local_assistant"/>
+    </record>
+
+    <record id="llm_assistant_mistral" model="llm.assistant">
+      <field name="name">Mistral Production Assistant</field>
+      <field name="provider_id" ref="llm_provider_mistral"/>
+      <field name="model_id" ref="llm_model_prod_mistral"/>
+      <field name="prompt_id" ref="llm_prompt_mistral_assistant"/>
+    </record>
+
+    <record id="llm_assistant_groq" model="llm.assistant">
+      <field name="name">Groq Production Assistant</field>
+      <field name="provider_id" ref="llm_provider_groq"/>
+      <field name="model_id" ref="llm_model_prod_groq"/>
+      <field name="prompt_id" ref="llm_prompt_groq_assistant"/>
+    </record>
+
+    <record id="llm_assistant_opencode" model="llm.assistant">
+      <field name="name">OpenCode Production Assistant</field>
+      <field name="provider_id" ref="llm_provider_opencode"/>
+      <field name="model_id" ref="llm_model_prod_opencode"/>
+      <field name="prompt_id" ref="llm_prompt_opencode_assistant"/>
     </record>
 
   </data>

@@ -1,130 +1,111 @@
 # Session State — 2026-05-12
 
 ## Branch
-`m3-r1-route-intercept` (2 commits ahead of `main`)
+`chore/commit-all-changes-main`
 
-## What Is Done
+## Verified Working
 
-### M3 — Conversation Layer (merged to main via squash)
-- `ai.conversation` + `ai.message` models with classical inheritance hooks
-- JWT plumbing: orchestrator `/chat` + Odoo `/ai_brain/chat`
-- ADR 0013 (conversation architecture)
+### Orchestrator quality gates
+- `pytest tests -q` → 29 passed, 0 failed
+- `ruff check app eval tests` → all checks passed
+- `mypy app --ignore-missing-imports` → success
 
-### M3-R1 — Route Intercept (on current branch, not yet PR'd)
-| Commit | Content |
-|---|---|
-| `f0b4d68` | Route intercept controller, `/ai_brain/gate` endpoint, `addons/vendor/_rfs.scss` fix (Bootstrap vendor/rfs SCSS error) |
-| `66a29b9` | Premium glassmorphism login CSS + QWeb template override, LiteLLM fallback model groups in `config.yaml` |
+### M3 conversation layer
+- Odoo `/ai_brain/chat` controller implemented and JWT-forwarding is active
+- Orchestrator `/chat` endpoint validates JWT and routes via LiteLLM
+- `ai.conversation` and `ai.message` models are present
 
-**Files changed vs main (14 files, +1065 lines):**
-- `addons/ai_brain/controllers/ai_brain_thread.py` — route intercept
-- `addons/ai_brain/static/src/css/auth.css` — glassmorphism login
-- `addons/ai_brain/views/auth_templates.xml` — QWeb login template override
-- `addons/ai_brain/tests/test_route_intercept.py` — route intercept tests
-- `addons/vendor/_rfs.scss` — Bootstrap RFS vendor fix
-- `orchestrator/app/api/gate.py` — gate endpoint
-- `orchestrator/tests/test_chat_gate.py` — gate tests
-- `infra/litellm/config.yaml` — fallback model groups added
-- `.env.example` — GROQ_API_KEY + MISTRAL_API_KEY placeholders
+### M4 finance-first implementation (substantially complete in code)
+- U1 models present:
+	- `ai.reconciliation.session`
+	- `ai.reconciliation.suggestion`
+	- `ai.aml.alert`
+- U2 deterministic engine present:
+	- `addons/ai_brain/services/matching_engine.py`
+- U3 tools model present:
+	- `addons/ai_brain/models/ai_brain_finance.py`
+	- methods: `suggest_bank_reconciliation`, `generate_reconciliation_report`, `check_aml_patterns`
+- U4 tools endpoint present:
+	- `orchestrator/app/api/tools.py` (`POST /tools/narrative`)
+- U5 dashboard present:
+	- `addons/ai_brain/controllers/dashboard.py`
+	- `addons/ai_brain/templates/dashboard.xml`
+- U6 tests/eval tasks present for finance/dashboard/narrative paths
 
-### M4 — Plan Written
-Plan at `docs/plans/2026-05-12-001-feat-m4-financial-intelligence-tools-plan.md`
-
-Scope (Finance-first; CRM deferred to M5):
-- **U1** — Odoo models: `ai.reconciliation.session`, `ai.reconciliation.suggestion`, `ai.aml.alert`
-- **U2** — `MatchingEngine` service in `addons/ai_brain/services/matching_engine.py`
-- **U3** — `ai.brain.finance` model with `@llm_tool` methods: `suggest_bank_reconciliation`, `generate_reconciliation_report`, `check_aml_patterns`
-- **U4** — Orchestrator `POST /tools/narrative` in `orchestrator/app/api/tools.py`
-- **U5** — HTML dashboard controller at `/ai_brain/dashboard`
-- **U6** — 5 eval tasks + unit tests
-
----
-
-## Blocked / Pending (in order)
-
-### 1. SECURITY — Rotate all exposed tokens (USER ACTION REQUIRED)
-All keys shared in chat are treated as compromised. Revoke and regenerate each:
-
-| Key | Where to revoke |
-|---|---|
-| GitHub PAT `ghp_ymUwE...` | github.com/settings/tokens |
-| GitHub PAT `github_pat_11CAM3DDQ0...` | github.com/settings/tokens |
-| Groq `gsk_OaCR7b...` | console.groq.com/keys |
-| Mistral `lYFHz82e...` | console.mistral.ai/api-keys |
-| Opencode Z `sk-3Whsq...` | your Opencode dashboard |
-
-After generating fresh keys, add them to `.env` (never in chat or code).
-
-### 2. LiteLLM config — wrong model name prefixes
-In `infra/litellm/config.yaml`, GitHub Models routes need `openai/` prefix:
-- `mistral-ai/Mistral-small` → `openai/mistral-ai/Mistral-small`
-- `meta/Meta-Llama-3.1-8B-Instruct` → `openai/meta/Meta-Llama-3.1-8B-Instruct`
-
-### 3. Orchestrator — missing auth header for LiteLLM
-In `orchestrator/app/api/chat.py::_call_litellm()`, when `LITELLM_MASTER_KEY` is set the httpx POST must include `Authorization: Bearer <LITELLM_MASTER_KEY>`. Currently missing → 401 from LiteLLM.
-
-### 4. Create + merge PR #13 for M3-R1 branch
-Push `m3-r1-route-intercept`, open PR against `main`, squash-merge.
-Required before creating `m4-*` branch.
-
-### 5. Write ADR 0014 — matching engine approach
-Required before M4 implementation starts (project policy A1).
-
-### 6. Implement M4 (all 6 units)
-See plan doc above.
-
-### 7. M5 — CRM auto follow-up + sequence reminders (deferred)
+### Syntax/config integrity restored
+- No merge-conflict markers remain in active source/config files
+- Python compile checks pass for key `addons/ai_brain` files
+- `infra/litellm/config.yaml` parses successfully as YAML
 
 ---
 
-## Key Technical Notes
+## Pending / Next Work
 
-### Odoo 18 QWeb login inheritance
-- `inherit_id="web.login_layout"` priority=20
-- Correct xpath: `//t[@t-call='web.frontend_layout']` (not `web.layout`)
-- Use `t-out="0"` (not deprecated `t-raw`)
+### 1) Environment-backed validation still pending
+- `make eval` currently reports mostly `SKIP` because local services and required env vars are not fully provisioned in this shell context.
+- Required for meaningful end-to-end validation:
+	- Odoo + orchestrator + LiteLLM running
+	- `ODOO_ADMIN_PASS`, `ORCH_JWT_SECRET`, and LiteLLM key env vars set
 
-### LLM provider routing (Section D3)
+### Current execution blockers (observed today)
+- Docker daemon unavailable on this host shell (`dockerDesktopLinuxEngine` pipe missing), so compose stack cannot start.
+- `.env` readiness check:
+	- `ORCH_JWT_SECRET`: set
+	- `LITELLM_VKEY_CLOUD_DEV`: set
+	- `ODOO_ADMIN_PASS`: missing
+	- `LITELLM_MASTER_KEY`: missing
+
+### 2) Documentation alignment
+- `README.md` still contains stale references (for example Odoo 19 wording and outdated command list) and should be synchronized with the current Odoo 18 + Makefile reality.
+
+### 3) Admin usage endpoint hardening
+- `/admin/usage` is now Redis-backed and returns live counters with budget limits.
+- Future enhancement: replace temporary `anonymous` user key with authenticated actor/tenant context.
+
+### 4) Security hygiene (user action)
+- Rotate any credentials previously exposed in chat/session history.
+- Store fresh credentials in `.env` only.
+
+---
+
+## Session Update — 2026-05-12 (Later)
+
+### Completed in this run
+- Docker Desktop started and compose stack is up (`db`, `redis`, `odoo`, `orchestrator`, `litellm`, `nginx`, `jaeger`).
+- Playwright MCP validation completed:
+  - `http://localhost:8088/health` returns `{"status":"ok","version":"0.1.0"}`
+  - Odoo DB selector is reachable and navigation to `ai_brain_dev` login page works.
+- `LITELLM_MASTER_KEY` added to `.env` and LiteLLM/orchestrator services reloaded.
+
+### Current prerequisite status
+- `ORCH_JWT_SECRET`: set
+- `LITELLM_MASTER_KEY`: set
+- `LITELLM_VKEY_CLOUD_DEV`: set
+- `ODOO_ADMIN_PASS`: missing
+
+### Eval status after this run
+- `3 passed, 15 skipped, 0 failed`
+- Remaining skips are primarily due to missing `ODOO_ADMIN_PASS` and unstable/downstream LiteLLM task conditions.
+
+---
+
+## Key Notes
+
+### Routing rules
 ```
-PRIVATE_MODE=true       → prod-local (Ollama)
-ENVIRONMENT=production  → prod-default (Anthropic claude-haiku-4-5)
-ENVIRONMENT=development → github-dev (GitHub Models gpt-4o-mini)
+PRIVATE_MODE=true       -> prod-local
+ENVIRONMENT=production  -> prod-default
+ENVIRONMENT=development -> github-dev
 ```
 
-### Deterministic matching engine (M4-U2)
-- Amount tolerance ±0.01 (configurable)
-- Date window ±7 days (configurable)
-- Partner name fuzzy match via token-set ratio ≥80
-- Reference Jaccard similarity
-- Composite confidence score 0–100
+### Finance heuristics currently implemented
+- Structuring band: 85% to 99% of threshold
+- Round-number detection: multiples of 1000 with minimum count gate
+- High-frequency detection: >10 transactions in 24h window
 
-### AML heuristics (M4-U3)
-- Structuring: 85–99% of reporting threshold
-- Round-number clustering: ≥3 transactions × 1,000 in 24h
-- High-frequency: >10 transactions per partner in 24h
-
-### `@llm_tool` vendor registration pattern
-`llm_tool/models/llm_tool.py::_register_hook()` → `_scan_tool_decorators()` → `_sync_tools_to_db()` on every Odoo startup (raw SQL + advisory lock). New tools must have `decorator_model` and `decorator_method` fields.
-
----
-
-## Untracked files (not in any PR yet)
-- `TODO.html`
-- `llm-test-suite.html`
-- `ui-screenshot.png`
-- `addons/website_sgctech_ai/` — new addon, scope TBD
-- `docs/plans/` — M4 plan (commit with M4 branch)
-
----
-
-## Make targets
+### Make targets used for validation
 ```
-make up          # Start core stack
-make down        # Stop everything
-make logs        # Tail all logs
-make test        # Run tests
-make eval        # Run eval harness
-make lint        # ruff + mypy
-make shell-odoo  # Shell into Odoo container
-make shell-orch  # Shell into orchestrator container
+make test
+make lint
+make eval
 ```

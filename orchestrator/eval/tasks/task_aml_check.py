@@ -82,7 +82,7 @@ async def task_aml_check(client: httpx.AsyncClient, base_url: str) -> dict:
         client,
         "check_aml_patterns",
         "ai.brain.finance",
-        [partner_ids, 30, 10000.0],
+        [[], partner_ids, 30, 10000.0],
     )
     if not isinstance(result, dict):
         return {"status": "fail", "reason": f"unexpected result payload: {result!r}"}

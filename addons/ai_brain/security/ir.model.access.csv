@@ -3,7 +3,8 @@ access_ai_origin_mixin_user,ai.origin.mixin user,model_ai_origin_mixin,base.grou
 access_ai_tool_log_user,ai.tool.log user read,model_ai_tool_log,base.group_user,1,0,0,0
 access_ai_tool_log_system,ai.tool.log system write,model_ai_tool_log,base.group_system,1,1,1,0
 access_ai_reconciliation_session_user,ai.reconciliation.session.user,model_ai_reconciliation_session,base.group_user,1,0,0,0
-access_ai_reconciliation_session_accountant,ai.reconciliation.session.accountant,model_ai_reconciliation_session,account.group_account_user,1,1,1,1
+access_ai_reconciliation_session_accountant,ai.reconciliation.session.accountant,model_ai_reconciliation_session,base.group_system,1,1,1,1
 access_ai_reconciliation_suggestion_user,ai.reconciliation.suggestion.user,model_ai_reconciliation_suggestion,base.group_user,1,0,0,0
-access_ai_reconciliation_suggestion_accountant,ai.reconciliation.suggestion.accountant,model_ai_reconciliation_suggestion,account.group_account_user,1,1,1,1
-access_ai_aml_alert_accountant,ai.aml.alert.accountant,model_ai_aml_alert,account.group_account_user,1,1,1,1
+access_ai_reconciliation_suggestion_accountant,ai.reconciliation.suggestion.accountant,model_ai_reconciliation_suggestion,base.group_system,1,1,1,1
+access_ai_aml_alert_accountant,ai.aml.alert.accountant,model_ai_aml_alert,base.group_system,1,1,1,1
+access_ai_brain_finance_user,ai.brain.finance user,model_ai_brain_finance,base.group_user,1,1,1,1
