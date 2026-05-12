@@ -8,6 +8,7 @@ from prometheus_client import Counter, Histogram, make_asgi_app
 from app.api.admin import router as admin_router
 from app.api.chat import router as chat_router
 from app.api.health import router as health_router
+from app.api.tools import router as tools_router
 from app.config import _assert_no_github_models_in_production, get_active_model
 
 logger = structlog.get_logger()
@@ -97,4 +98,9 @@ app = FastAPI(
 app.include_router(health_router)
 app.include_router(admin_router)
 app.include_router(chat_router)
+<<<<<<< Updated upstream
+=======
+app.include_router(gate_router)
+app.include_router(tools_router)
+>>>>>>> Stashed changes
 app.mount("/metrics", make_asgi_app())

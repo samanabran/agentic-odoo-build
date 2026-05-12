@@ -1,0 +1,68 @@
+Listed directory Agentic_odoo_build
+Viewed .env.example:1-61
+Viewed README.md:1-84
+Viewed ARCHITECTURE.md:1-35
+Viewed Makefile:1-55
+Viewed bootstrap.sh:1-87
+
+I have scanned the workspace and reviewed the project structure, architecture, and requirements. Here is my comprehensive understanding and an itemized list of what is needed to get the **Odoo AI Brain** build running properly.
+
+### 🏗️ Workspace Understanding
+
+This is a sophisticated AI integration for **Odoo 18**. It uses a **FastAPI Orchestrator** as the "brain," which manages LLM logic via **LangGraph** and **LiteLLM**. The system is designed to be multi-tenant, secure (JWT-based), and features a "Human-in-the-Loop" approval process for AI actions.
+
+**Key Components:**
+
+* **Odoo 18 (addons/ai_brain):** The user interface and ERP data source.
+* **Orchestrator (orchestrator/):** A FastAPI service that plans and executes AI tasks.
+* **LiteLLM (infra/):** A gateway that abstracts different LLM providers (Anthropic, OpenAI, GitHub Models).
+* **Infrastructure:** PostgreSQL with `pgvector` for memory/RAG, Redis for session caching, and Nginx as a reverse proxy.
+
+---
+
+### 📋 Requirements & Preparation Items
+
+To make this build functional, we must prepare the following items:
+
+#### 1. Software & Environment
+
+* **Docker Desktop:** Required to run the 7-service container stack.
+* **OpenSSL:** Needed to generate secure secrets (Standard on Linux/Mac; might need [Git Bash](https://git-scm.com/downloads) or [OpenSSL for Windows](https://slproweb.com/products/Win32OpenSSL.html)).
+* **Make:** Used to run the shorthand commands in the `Makefile`.
+* **Python 3.11+:** Required for local orchestrator testing and the evaluation harness.
+
+#### 2. Configuration (`.env`)
+
+You need to create a `.env` file from the `.env.example`. I have itemized the critical lines below:
+
+| Variable | Requirement | Why & Where |
+| :--- | :--- | :--- |
+| `ORCH_JWT_SECRET` | `openssl rand -hex 32` | **Why:** Signs the security tokens between Odoo and the Orchestrator. |
+| `LITELLM_MASTER_KEY`| `openssl rand -hex 32` | **Why:** The master password for the LiteLLM gateway service. |
+| `LITELLM_SALT_KEY`  | `openssl rand -hex 32` | **Why:** Encrypts virtual LLM keys at rest in the database. |
+| `GITHUB_TOKEN`      | [GitHub Token URL](https://github.com/settings/tokens) | **Why:** Required for `ENVIRONMENT=development` to use free GitHub Models. |
+| `ANTHROPIC_API_KEY` | [Anthropic Console](https://console.anthropic.com/) | **Why:** Required for `ENVIRONMENT=production` (Claude-3-Haiku). |
+
+#### 3. Installation & Bootstrap Steps
+
+These must be performed in order to initialize the workspace:
+
+1. **Initialize Submodules:**
+    * Command: `git submodule update --init --recursive`
+    * *Reason:* Pulls the `apexive/odoo-llm` framework into `addons/vendor/`. Without this, the AI core is missing.
+2. **Run Bootstrap Script:**
+    * Command: `bash scripts/bootstrap.sh`
+    * *Reason:* Automates pulling 4GB+ of Docker images, setting up the `pgvector` database extension, and checking service health.
+3. **Odoo Database Creation:**
+    * URL: [http://localhost:8069](http://localhost:8069)
+    * Action: Create a database named `ai_brain_dev` (must match `.env`).
+4. **Install AI Brain Module:**
+    * Action: In Odoo, go to Apps and install `ai_brain`. This adds the chat interface.
+
+---
+
+### 🚀 Next Steps
+
+Once you confirm you have **Docker** and **OpenSSL** ready, I can help you generate the keys and run the bootstrap script to bring the environment to life.
+
+**Are you ready to proceed with generating the `.env` secrets and running the bootstrap?**

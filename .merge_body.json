@@ -1,0 +1,5 @@
+{
+  "merge_method": "squash",
+  "commit_title": "M3-R1: Route intercept + glassmorphism login + LiteLLM fallbacks",
+  "commit_message": "Squash-merge M3-R1 branch:\n- Route intercept controller with /ai_brain/gate\n- Premium glassmorphism login CSS + QWeb template\n- LiteLLM fallback model groups\n- Bootstrap vendor/rfs SCSS fix"
+}

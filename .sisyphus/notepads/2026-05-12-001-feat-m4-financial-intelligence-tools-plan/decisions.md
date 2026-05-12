@@ -1,0 +1,10 @@
+2026-05-12: Implemented /tools/narrative as a dedicated FastAPI router that reuses app.api.chat._call_litellm rather than introducing a second LiteLLM client path.
+2026-05-12: Kept task validation inside the endpoint and returned HTTP 422 for unsupported tasks to satisfy the requested API contract while still allowing custom prompt text per supported task.
+2026-05-12: Implemented M4-U1 reconciliation storage in a single `ai_reconciliation.py` module, with `ai.reconciliation.session` inheriting both `ai.origin.mixin` and `mail.thread`, and `ai.aml.alert` inheriting `ai.origin.mixin` only per spec.
+2026-05-12: Implemented `ai.brain.finance` as a dedicated mail.thread-backed model using vendor `@llm_tool` decorators, with deterministic reconciliation matching and AML heuristics staying inside Odoo while narrative generation is batched through one orchestrator `/tools/narrative` call per tool run.
+2026-05-12: Added the missing M4 E4 audit columns directly to `ai.tool.log` so finance tools can write required append-only entries (`args_json`, `result_json`, `success`, `latency_ms`, approval and origin metadata) without introducing a second logging model.
+2026-05-12: Adjusted finance tool metadata so all three finance methods are treated as write/approval-gated tools, because each method mutates Odoo state and two of them also invoke an external orchestrator endpoint.
+2026-05-12: Stored `args_sha256` and `result_sha256` alongside truncated JSON payloads in `ai.tool.log` to align the finance-tool audit trail with CLAUDE.md E4's "truncated if huge, full hash always" requirement.
+2026-05-12: Implemented the financial dashboard as a self-contained QWeb page with inline CSS and server-precomputed confidence bars so the template stays simple and avoids unsupported Python formatting edge cases during render.
+- Kept AML heuristic tests as Odoo TransactionCase tests instead of extracting helper functions; this validates the actual ai.brain.finance methods without changing production code structure.
+- Added importability verification with python importlib/py_compile rather than changing eval harness infrastructure, per task constraints.

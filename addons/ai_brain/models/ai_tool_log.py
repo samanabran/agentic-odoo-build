@@ -35,8 +35,16 @@ class AiToolLog(models.Model):
         default=lambda self: self.env.uid,
         index=True,
     )
-    # M4 will add: args_json, result_json, success, latency_ms,
-    #              approved_by, conversation_id, message_id, origin_ip
+    args_json = fields.Text()
+    args_sha256 = fields.Char()
+    result_json = fields.Text()
+    result_sha256 = fields.Char()
+    success = fields.Boolean(default=False)
+    latency_ms = fields.Integer(default=0)
+    approved_by = fields.Many2one("res.users", string="Approved By")
+    conversation_id = fields.Char(index=True)
+    message_id = fields.Char(index=True)
+    origin_ip = fields.Char()
 
     def _compute_cost(self, model_name: str, tokens_in: int, tokens_out: int) -> float:
         rate = _COST_PER_1K.get(model_name, 0.0)
