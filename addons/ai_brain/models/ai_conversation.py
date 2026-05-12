@@ -14,8 +14,16 @@ If you are tempted to add fields here for "the AI domain", read ADR 0013
 first. Most thread-level data already exists on llm.thread (model, res_id,
 provider_id, model_id, user_id, tool_ids).
 """
-from odoo import models
+from odoo import fields, models
 
 
 class AIConversation(models.Model):
     _inherit = "llm.thread"
+
+    is_ai_brain = fields.Boolean(
+        string="AI Brain Thread",
+        default=False,
+        index=True,
+        help="True when thread was created via the ai_brain chat surface (ADR 0013 R1). "
+             "Routes /llm/thread/generate through the orchestrator policy gate.",
+    )

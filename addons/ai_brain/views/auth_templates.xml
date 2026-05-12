@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Premium glassmorphism login page — overrides web.login_layout -->
+    <!-- Depends only on 'web' module; no 'website' dependency required -->
+    <template id="login_layout" inherit_id="web.login_layout" priority="20">
+        <!-- web.login_layout calls web.frontend_layout (confirmed Odoo 18 source) -->
+        <xpath expr="//t[@t-call='web.frontend_layout']" position="replace">
+            <t t-call="web.frontend_layout">
+                <t t-set="no_footer" t-value="True"/>
+                <div class="sgc-auth-shell">
+                    <div class="sgc-auth-grid">
+                        <!-- Left: brand panel -->
+                        <div class="sgc-auth-brand-panel">
+                            <div>
+                                <div class="sgc-auth-logo">
+                                    <div class="sgc-auth-logo-mark">AI</div>
+                                    <span class="sgc-auth-brand-name">AI Brain</span>
+                                </div>
+                                <h1 class="sgc-auth-headline">
+                                    Your ERP,<br/>
+                                    <span>intelligently</span><br/>
+                                    augmented.
+                                </h1>
+                                <p class="sgc-auth-subheadline">
+                                    AI-powered insights, automated workflows,
+                                    and real-time assistance — all within Odoo.
+                                </p>
+                                <div class="sgc-auth-stats">
+                                    <div class="sgc-stat-card">
+                                        <span class="sgc-stat-number">M3</span>
+                                        <span class="sgc-stat-label">Milestone</span>
+                                    </div>
+                                    <div class="sgc-stat-card">
+                                        <span class="sgc-stat-number">100%</span>
+                                        <span class="sgc-stat-label">Local</span>
+                                    </div>
+                                    <div class="sgc-stat-card">
+                                        <span class="sgc-stat-number">JWT</span>
+                                        <span class="sgc-stat-label">Secured</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <ul class="sgc-auth-trust-list">
+                                <li>All data stays within your infrastructure</li>
+                                <li>Private mode — zero external LLM calls</li>
+                                <li>Append-only audit log for every AI action</li>
+                            </ul>
+                        </div>
+
+                        <!-- Right: login form card — Odoo injects form via t-out="0" -->
+                        <div class="sgc-auth-card">
+                            <h2 class="sgc-auth-card-title">Welcome back</h2>
+                            <p class="sgc-auth-card-subtitle">Sign in to your workspace</p>
+                            <t t-out="0"/>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>
