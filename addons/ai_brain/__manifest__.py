@@ -13,9 +13,12 @@
     "data": [
         "security/ir.model.access.csv",
         "templates/dashboard.xml",
+        "views/ai_panel_actions.xml",
     ],
     "assets": {
         "web.assets_backend": [
+            "ai_brain/static/src/components/AiBrainPanel.scss",
+            "ai_brain/static/src/components/AiBrainPanel.xml",
             "ai_brain/static/src/components/AiBrainPanel.js",
         ],
     },

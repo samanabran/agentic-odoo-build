@@ -8,7 +8,8 @@ import os
 import time
 from datetime import datetime, time as dt_time, timedelta
 
-import httpx
+import urllib.error
+import urllib.request
 
 from odoo import _, fields, models
 from odoo.http import request as http_request
@@ -517,14 +518,23 @@ class AiBrainFinance(models.Model):
     def _call_narrative(self, task: str, items: list[dict]) -> str:
         token = _mint_orchestrator_jwt(self.env.user.id)
         orch_url = os.environ.get("ORCH_URL", "http://orchestrator:8088").rstrip("/")
-        with httpx.Client(timeout=60.0) as client:
-            response = client.post(
-                f"{orch_url}/tools/narrative",
-                json={"task": task, "items": items},
-                headers={"Authorization": f"Bearer {token}"},
-            )
-        response.raise_for_status()
-        return response.json().get("narrative", "")
+        data = json.dumps({"task": task, "items": items}).encode()
+        req = urllib.request.Request(
+            f"{orch_url}/tools/narrative",
+            data=data,
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=60) as resp:
+                return json.loads(resp.read()).get("narrative", "")
+        except urllib.error.HTTPError as exc:
+            raise RuntimeError(
+                f"Narrative endpoint error {exc.code}: {exc.read().decode()}"
+            ) from exc
 
     def _log_tool_call(
         self,

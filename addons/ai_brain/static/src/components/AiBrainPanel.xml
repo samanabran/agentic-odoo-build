@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="ai_brain.AiBrainPanel" owl="1">
+        <div class="o_action o_ai_brain_panel">
+
+            <div class="o_ai_brain_header">
+                <div class="o_ai_brain_title">
+                    <i class="fa fa-bolt text-warning"/>
+                    <h2>AI Brain — Finance Panel</h2>
+                </div>
+                <p class="o_ai_brain_subtitle">Click a button for an instant AI-powered insight</p>
+            </div>
+
+            <div class="o_ai_brain_grid">
+                <t t-foreach="actions" t-as="action" t-key="action.id">
+                    <button
+                        t-attf-class="o_ai_brain_btn o_ai_btn_{{ action.color }}{{ state.activeId === action.id ? ' o_ai_active' : '' }}"
+                        t-on-click="() => this.onActionClick(action)"
+                        t-att-disabled="state.loading">
+                        <i t-attf-class="fa {{ action.icon }} o_ai_btn_icon"/>
+                        <span t-esc="action.label"/>
+                    </button>
+                </t>
+            </div>
+
+            <div class="o_ai_brain_custom">
+                <input
+                    type="text"
+                    class="o_input"
+                    placeholder="Ask a custom finance question…"
+                    t-model="state.customPrompt"
+                    t-on-keydown="onKeydown"
+                    t-att-disabled="state.loading"
+                />
+                <button class="btn btn-primary" t-on-click="onAsk" t-att-disabled="state.loading">
+                    <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-paper-plane' }}"/>
+                    Ask
+                </button>
+            </div>
+
+            <t t-if="state.loading">
+                <div class="o_ai_brain_loading">
+                    <i class="fa fa-spinner fa-spin"/> Analysing your data…
+                </div>
+            </t>
+
+            <t t-if="state.replyHtml">
+                <div class="o_ai_brain_result">
+                    <div class="o_ai_brain_result_header">
+                        <span><i class="fa fa-comment-o"/> AI Response</span>
+                        <button class="btn btn-sm btn-light" t-on-click="onClear">
+                            <i class="fa fa-times"/> Clear
+                        </button>
+                    </div>
+                    <div class="o_ai_brain_result_body" t-out="state.replyHtml"/>
+                </div>
+            </t>
+
+            <t t-if="state.error">
+                <div class="alert alert-danger mt-3">
+                    <i class="fa fa-exclamation-triangle"/>
+                    <t t-esc="state.error"/>
+                </div>
+            </t>
+
+        </div>
+    </t>
+</templates>
