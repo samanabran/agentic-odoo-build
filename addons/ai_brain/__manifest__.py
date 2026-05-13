@@ -8,15 +8,15 @@
         "base",
         "web",
         # Apexive vendor modules (M2) — must be installed first via
-        # scripts/deploy_addons_to_prod.sh; loaded from addons/vendor/odoo-llm, incl. llm_mistral
+        # scripts/deploy_addons_to_prod.sh; loaded from addons/vendor/odoo-llm
         "llm",
         "llm_thread",
         "llm_tool",
         "llm_assistant",
         "llm_openai",
-        "llm_mistral",
         "llm_knowledge",
         "llm_tool_knowledge",
+        # NOT included: llm_mistral (mistralai pkg incompatible; Mistral routes via LiteLLM)
         # NOT included: llm_ollama (private mode only), llm_pgvector (M5, needs pgvector ext)
         # NOT included: llm_mcp_server (M7), llm_tool_account (M7)
     ],

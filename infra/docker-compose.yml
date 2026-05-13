@@ -35,6 +35,8 @@ services:
       HOST: db
       USER: ${POSTGRES_USER:-odoo}
       PASSWORD: ${POSTGRES_PASSWORD:-odoo}
+      ORCH_JWT_SECRET: ${ORCH_JWT_SECRET}
+      ORCHESTRATOR_URL: ${ORCHESTRATOR_URL:-http://orchestrator:8088}
     volumes:
       - ../addons:/mnt/extra-addons
       - odoo_data:/var/lib/odoo
@@ -57,6 +59,8 @@ services:
       ORCH_JWT_SECRET: ${ORCH_JWT_SECRET}
       ORCH_REDIS_URL: ${ORCH_REDIS_URL:-redis://redis:6379/0}
       LITELLM_BASE_URL: http://litellm:4000
+      LITELLM_URL: http://litellm:4000
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-}
       ENVIRONMENT: ${ENVIRONMENT:-development}
       PRIVATE_MODE: ${PRIVATE_MODE:-false}
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}

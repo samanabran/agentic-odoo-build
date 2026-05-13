@@ -83,9 +83,11 @@
   - `task_aml_check` — runtime exception from Odoo call
   - `task_narrative_quality` — `/tools/narrative` endpoint returns 500
 
+### Final eval (2026-05-13 after all fixes)
+- **17 passed, 1 skipped, 0 failed**
+- Only skip: `task_006_ollama_echo` — intentional (PRIVATE_MODE not active)
+
 ### Next actions
-- Investigate `/tools/narrative` 500 error (orchestrator logs)
-- Investigate `task_aml_check` runtime exception
 - README.md alignment (stale Odoo 19 references)
 
 ---
