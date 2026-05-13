@@ -59,7 +59,7 @@
                     <span class="o_ai_active_label">
                         <t t-if="state.activeId and state.activeId !== 'custom'">
                             <i class="fa fa-circle text-success"/> Active:
-                            <strong t-esc="getActiveLabel()"/>
+                            <strong t-esc="this.getActiveLabel()"/>
                         </t>
                         <t t-elif="state.activeId === 'custom'">
                             <i class="fa fa-circle text-primary"/> Custom query
@@ -79,6 +79,9 @@
                 <div class="o_ai_brain_input_bar">
                     <input
                         type="text"
+                        id="ai_brain_message"
+                        name="ai_brain_message"
+                        autocomplete="off"
                         class="o_ai_message_input"
                         placeholder="Enter message…"
                         t-model="state.customPrompt"
