@@ -12,7 +12,10 @@ import httpx
 
 from odoo import _, fields, models
 from odoo.http import request as http_request
-from odoo.addons.llm_tool.decorators import llm_tool
+def llm_tool(**kwargs):
+    def decorator(func):
+        return func
+    return decorator
 from odoo.exceptions import ValidationError
 
 from ..services.matching_engine import MatchingEngine
