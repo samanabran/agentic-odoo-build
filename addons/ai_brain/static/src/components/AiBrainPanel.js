@@ -145,6 +145,10 @@ export class AiBrainPanel extends Component {
     onAsk() { const q = this.state.customPrompt.trim(); if (q) this._call(q, "custom"); }
     onKeydown(ev) { if (ev.key === "Enter") this.onAsk(); }
     onClear() { Object.assign(this.state, { replyHtml: null, error: "", activeId: null }); }
+    getActiveLabel() {
+        const a = ACTIONS.find(x => x.id === this.state.activeId);
+        return a ? a.label : this.state.activeId;
+    }
 }
 
 AiBrainPanel.template = "ai_brain.AiBrainPanel";

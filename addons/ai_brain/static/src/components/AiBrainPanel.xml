@@ -3,16 +3,9 @@
     <t t-name="ai_brain.AiBrainPanel" owl="1">
         <div class="o_action o_ai_brain_panel">
 
-            <!-- LEFT SIDEBAR: header + action buttons -->
+            <!-- LEFT: Quick Commands sidebar -->
             <div class="o_ai_brain_sidebar">
-                <div class="o_ai_brain_header">
-                    <div class="o_ai_brain_title">
-                        <i class="fa fa-bolt text-warning"/>
-                        <span>AI Brain</span>
-                    </div>
-                    <p class="o_ai_brain_subtitle">Click a report to analyse</p>
-                </div>
-
+                <p class="o_ai_sidebar_title">Quick Commands</p>
                 <div class="o_ai_brain_btn_list">
                     <t t-foreach="actions" t-as="action" t-key="action.id">
                         <button
@@ -26,10 +19,10 @@
                 </div>
             </div>
 
-            <!-- RIGHT MAIN: output on top, input bar pinned at bottom -->
+            <!-- RIGHT: Output + status bar + message input -->
             <div class="o_ai_brain_main">
 
-                <!-- Output area -->
+                <!-- Top: large output / dashboard area -->
                 <div class="o_ai_brain_output">
                     <t t-if="state.loading">
                         <div class="o_ai_brain_loading">
@@ -40,7 +33,7 @@
 
                     <t t-elif="state.error">
                         <div class="o_ai_brain_result_body">
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger mt-2">
                                 <i class="fa fa-exclamation-triangle"/>
                                 <strong> Error: </strong>
                                 <t t-esc="state.error"/>
@@ -49,36 +42,51 @@
                     </t>
 
                     <t t-elif="state.replyHtml">
-                        <div class="o_ai_brain_result_header">
-                            <span><i class="fa fa-bar-chart"/> AI Report</span>
-                            <button class="btn btn-sm btn-light" t-on-click="onClear">
-                                <i class="fa fa-times"/> Clear
-                            </button>
-                        </div>
                         <div class="o_ai_brain_result_body" t-out="state.replyHtml"/>
                     </t>
 
                     <t t-else="">
                         <div class="o_ai_brain_empty">
                             <i class="fa fa-bar-chart fa-3x"/>
-                            <p>Select a report from the left panel to get started</p>
+                            <p>Select a Quick Command on the left to generate a report</p>
+                            <p class="o_ai_empty_sub">Or type a custom question in the message bar below</p>
                         </div>
                     </t>
                 </div>
 
-                <!-- Custom question input — pinned at bottom -->
-                <div class="o_ai_brain_custom">
+                <!-- Middle: status strip (active report + clear) -->
+                <div class="o_ai_brain_status_bar">
+                    <span class="o_ai_active_label">
+                        <t t-if="state.activeId and state.activeId !== 'custom'">
+                            <i class="fa fa-circle text-success"/> Active:
+                            <strong t-esc="getActiveLabel()"/>
+                        </t>
+                        <t t-elif="state.activeId === 'custom'">
+                            <i class="fa fa-circle text-primary"/> Custom query
+                        </t>
+                        <t t-else="">
+                            <i class="fa fa-circle-o text-muted"/> No report selected
+                        </t>
+                    </span>
+                    <button t-if="state.replyHtml or state.error"
+                            class="btn btn-sm btn-outline-secondary"
+                            t-on-click="onClear">
+                        <i class="fa fa-times"/> Clear
+                    </button>
+                </div>
+
+                <!-- Bottom: message input bar -->
+                <div class="o_ai_brain_input_bar">
                     <input
                         type="text"
-                        class="o_input"
-                        placeholder="Ask a custom finance question…"
+                        class="o_ai_message_input"
+                        placeholder="Enter message…"
                         t-model="state.customPrompt"
                         t-on-keydown="onKeydown"
                         t-att-disabled="state.loading"
                     />
-                    <button class="btn btn-primary" t-on-click="onAsk" t-att-disabled="state.loading">
-                        <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-paper-plane' }}"/>
-                        Ask
+                    <button class="o_ai_send_btn" t-on-click="onAsk" t-att-disabled="state.loading or !state.customPrompt">
+                        <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-arrow-right' }}"/>
                     </button>
                 </div>
 
