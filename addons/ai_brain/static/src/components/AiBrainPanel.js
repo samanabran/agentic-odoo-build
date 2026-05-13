@@ -117,7 +117,7 @@ export class AiBrainPanel extends Component {
         this.state = useState({
             loading: false,
             activeId: null,
-            replyHtml: markup(""),
+            replyHtml: null,   // null = no content; markup(str) = content to render
             error: "",
             customPrompt: "",
         });
@@ -125,16 +125,17 @@ export class AiBrainPanel extends Component {
     }
 
     async _call(prompt, id) {
-        Object.assign(this.state, { loading: true, activeId: id, replyHtml: markup(""), error: "" });
+        Object.assign(this.state, { loading: true, activeId: id, replyHtml: null, error: "" });
         try {
             const isCustom = id === "custom";
             const result = isCustom
                 ? await rpc("/ai_brain/finance", { action: "custom", prompt })
                 : await rpc("/ai_brain/finance", { action: id, prompt });
             const raw = result?.reply ?? JSON.stringify(result, null, 2);
-            this.state.replyHtml = markup(raw);
+            this.state.replyHtml = raw ? markup(raw) : null;
         } catch (err) {
-            this.state.error = err.message || "Unexpected error — please try again.";
+            this.state.error =
+                err?.data?.message || err?.message || "Unexpected error — please try again.";
         } finally {
             this.state.loading = false;
         }
@@ -143,7 +144,7 @@ export class AiBrainPanel extends Component {
     onActionClick(action) { this._call(action.prompt, action.id); }
     onAsk() { const q = this.state.customPrompt.trim(); if (q) this._call(q, "custom"); }
     onKeydown(ev) { if (ev.key === "Enter") this.onAsk(); }
-    onClear() { Object.assign(this.state, { replyHtml: markup(""), error: "", activeId: null }); }
+    onClear() { Object.assign(this.state, { replyHtml: null, error: "", activeId: null }); }
 }
 
 AiBrainPanel.template = "ai_brain.AiBrainPanel";
