@@ -68,6 +68,28 @@
 
 ---
 
+## Session Update — 2026-05-13
+
+### Completed in this run
+- Vendor submodule B2 violation resolved: reset `addons/vendor/odoo-llm` to pinned SHA `1ede75911` (was drifted to `c5c99465`)
+- `orchestrator/eval/runner.py` fixed: auto-loads `.env` via python-dotenv and reconfigures stdout to UTF-8 (Windows cp1252 crash fix)
+- Eval now runs natively via `python -m eval.runner` with no shell setup required
+
+### Eval results (2026-05-13)
+- **31 unit tests passed, 0 failed**
+- **15 eval tasks passed, 3 skipped, 0 failed** (up from 2 passed / 16 skipped)
+- Remaining skips:
+  - `task_006_ollama_echo` — intentional (PRIVATE_MODE not active)
+  - `task_aml_check` — runtime exception from Odoo call
+  - `task_narrative_quality` — `/tools/narrative` endpoint returns 500
+
+### Next actions
+- Investigate `/tools/narrative` 500 error (orchestrator logs)
+- Investigate `task_aml_check` runtime exception
+- README.md alignment (stale Odoo 19 references)
+
+---
+
 ## Session Update — 2026-05-12 (Later)
 
 ### Completed in this run
