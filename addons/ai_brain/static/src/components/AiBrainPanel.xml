@@ -26,24 +26,10 @@
                 </div>
             </div>
 
-            <!-- RIGHT MAIN: input + output -->
+            <!-- RIGHT MAIN: output on top, input bar pinned at bottom -->
             <div class="o_ai_brain_main">
 
-                <div class="o_ai_brain_custom">
-                    <input
-                        type="text"
-                        class="o_input"
-                        placeholder="Ask a custom finance question…"
-                        t-model="state.customPrompt"
-                        t-on-keydown="onKeydown"
-                        t-att-disabled="state.loading"
-                    />
-                    <button class="btn btn-primary" t-on-click="onAsk" t-att-disabled="state.loading">
-                        <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-paper-plane' }}"/>
-                        Ask
-                    </button>
-                </div>
-
+                <!-- Output area -->
                 <div class="o_ai_brain_output">
                     <t t-if="state.loading">
                         <div class="o_ai_brain_loading">
@@ -53,9 +39,12 @@
                     </t>
 
                     <t t-elif="state.error">
-                        <div class="alert alert-danger">
-                            <i class="fa fa-exclamation-triangle"/>
-                            <t t-esc="state.error"/>
+                        <div class="o_ai_brain_result_body">
+                            <div class="alert alert-danger">
+                                <i class="fa fa-exclamation-triangle"/>
+                                <strong> Error: </strong>
+                                <t t-esc="state.error"/>
+                            </div>
                         </div>
                     </t>
 
@@ -72,9 +61,25 @@
                     <t t-else="">
                         <div class="o_ai_brain_empty">
                             <i class="fa fa-bar-chart fa-3x"/>
-                            <p>Select a report from the left to get started</p>
+                            <p>Select a report from the left panel to get started</p>
                         </div>
                     </t>
+                </div>
+
+                <!-- Custom question input — pinned at bottom -->
+                <div class="o_ai_brain_custom">
+                    <input
+                        type="text"
+                        class="o_input"
+                        placeholder="Ask a custom finance question…"
+                        t-model="state.customPrompt"
+                        t-on-keydown="onKeydown"
+                        t-att-disabled="state.loading"
+                    />
+                    <button class="btn btn-primary" t-on-click="onAsk" t-att-disabled="state.loading">
+                        <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-paper-plane' }}"/>
+                        Ask
+                    </button>
                 </div>
 
             </div>
