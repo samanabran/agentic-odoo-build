@@ -380,6 +380,46 @@ def _fetch_payroll_vs_revenue(env, today, currency):
     return pnl + "\n" + payroll
 
 
+# ── Intent detection for custom chat questions ───────────────────────────────
+
+def _detect_intent(prompt: str):
+    """Map a natural-language question to a known action ID, or return None."""
+    p = prompt.lower()
+    if any(k in p for k in ("cash", "bank balance", "liquid", "bank account")):
+        return "cash"
+    if any(k in p for k in ("reconcil",)):
+        return "reconcile"
+    if any(k in p for k in ("aml", "anti-money", "money launder", "suspicious", "structur")):
+        return "aml"
+    if any(k in p for k in ("aged receiv", "customer owe", "overdue customer")):
+        return "receivables"
+    if any(k in p for k in ("aged payab", "vendor owe", "overdue vendor", "overdue payab")):
+        return "payables"
+    if any(k in p for k in ("invoice", "outstanding invoice", "unpaid invoice")):
+        return "invoices"
+    if any(k in p for k in ("vat", "tax ", "gst", "tax summary", "tax oblig")):
+        return "tax"
+    if any(k in p for k in ("p&l", "profit and loss", "profit/loss", "pnl", "net profit", "net loss")):
+        return "pnl"
+    if any(k in p for k in ("payroll vs", "labour cost", "labor cost", "payroll vs revenue")):
+        return "payroll_revenue"
+    if any(k in p for k in ("payroll", "salary", "salaries", "payslip")):
+        return "payroll"
+    if any(k in p for k in ("headcount", "employee", "staff count", "hr summary")):
+        return "hr"
+    if any(k in p for k in ("leave request", "absence", "time off", "annual leave")):
+        return "leaves"
+    if any(k in p for k in ("pipeline", "crm", "leads", "opportunities", "deal")):
+        return "pipeline"
+    if any(k in p for k in ("sales performance", "top seller", "salesperson", "revenue by")):
+        return "sales"
+    if any(k in p for k in ("revenue", "expense", "income", "profit", "loss", "margin")):
+        return "pnl"
+    if any(k in p for k in ("receivable", "payable", "summary", "overview", "financial")):
+        return "summary"
+    return None
+
+
 # ── Universal context snapshot (for custom questions) ───────────────────────
 
 def _build_universal_snapshot(env, today, currency) -> str:
@@ -547,9 +587,18 @@ class AiBrainController(http.Controller):
         currency = env.company.currency_id
 
         if action == "custom":
-            # Pull a full cross-app snapshot so the LLM can answer any question
-            context = _build_universal_snapshot(env, today, currency)
-            instruction = prompt or "Give a comprehensive overview of the business based on the data above."
+            # Try to route to a targeted fetcher via keyword detection
+            detected = _detect_intent(prompt) if prompt else None
+            if detected and detected in _FETCHERS:
+                try:
+                    context = _FETCHERS[detected](env, today, currency)
+                except Exception as exc:
+                    context = f"[Data fetch error: {exc}]\n"
+                base_instruction = _INSTRUCTIONS.get(detected, "Summarise the data above.")
+                instruction = f"{base_instruction} Answer the user's specific question: {prompt}"
+            else:
+                context = _build_universal_snapshot(env, today, currency)
+                instruction = prompt or "Give a comprehensive overview of the business based on the data above."
         elif action in _FETCHERS:
             try:
                 context = _FETCHERS[action](env, today, currency)

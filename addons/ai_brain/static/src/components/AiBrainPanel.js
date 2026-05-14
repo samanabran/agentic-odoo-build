@@ -3,6 +3,7 @@
 import { Component, useState, markup } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { rpc } from "@web/core/network/rpc";
+import { useService } from "@web/core/utils/hooks";
 import { xml } from "@odoo/owl";
 
 const ACTIONS = [
@@ -14,12 +15,12 @@ const ACTIONS = [
     { id: "receivables",      label: "Aged Receivables",     icon: "fa-arrow-circle-up",  color: "info",      prompt: "Show the aged receivables report. Group amounts customers owe us by: current, 1-30 days, 31-60 days, 61-90 days, 90+ days. Include top 5 overdue customers." },
     { id: "payables",         label: "Aged Payables",        icon: "fa-arrow-circle-down",color: "warning",   prompt: "Show the aged payables report. Group amounts we owe vendors by due date. Highlight any overdue payables." },
     { id: "tax",              label: "VAT / Tax Summary",    icon: "fa-calculator",       color: "secondary", prompt: "Summarise tax obligations for the current period: VAT collected on sales, VAT paid on purchases, and net VAT payable or refundable." },
-    { id: "pnl",              label: "P&L Snapshot",         icon: "fa-line-chart",       color: "success",   prompt: "" },
-    { id: "hr",               label: "Headcount",            icon: "fa-users",            color: "info",      prompt: "" },
-    { id: "payroll",          label: "Payroll Costs",        icon: "fa-id-card-o",        color: "warning",   prompt: "" },
-    { id: "leaves",           label: "Leave Requests",       icon: "fa-calendar-times-o", color: "secondary", prompt: "" },
-    { id: "sales",            label: "Sales Performance",    icon: "fa-trophy",           color: "success",   prompt: "" },
-    { id: "pipeline",         label: "CRM Pipeline",         icon: "fa-filter",           color: "primary",   prompt: "" },
+    { id: "pnl",              label: "P&L Snapshot",         icon: "fa-line-chart",       color: "success",   prompt: "Show the P&L snapshot for this month: revenue, expenses, and net profit or loss." },
+    { id: "hr",               label: "Headcount",            icon: "fa-users",            color: "info",      prompt: "Show total active employee headcount broken down by department." },
+    { id: "payroll",          label: "Payroll Costs",        icon: "fa-id-card-o",        color: "warning",   prompt: "Show payroll costs for the current month: total gross pay, net pay, and number of payslips processed." },
+    { id: "leaves",           label: "Leave Requests",       icon: "fa-calendar-times-o", color: "secondary", prompt: "Show pending leave requests awaiting approval. List employee, leave type, and dates." },
+    { id: "sales",            label: "Sales Performance",    icon: "fa-trophy",           color: "success",   prompt: "Show sales performance this month: total invoiced and breakdown by salesperson." },
+    { id: "pipeline",         label: "CRM Pipeline",         icon: "fa-filter",           color: "primary",   prompt: "Show the CRM pipeline: total pipeline value, number of leads, and breakdown by stage." },
     { id: "payroll_revenue",  label: "Payroll vs Revenue",   icon: "fa-balance-scale",    color: "danger",    prompt: "Compare total payroll costs against revenue for the current month. Show the labour cost ratio and flag as critical if it exceeds 50% of revenue. Include P&L summary." },
 ];
 
@@ -38,7 +39,10 @@ export class AiBrainPanel extends Component {
 
     // ── Quick Command → renders in big report area ──────────────────────────
     async onActionClick(action) {
-        Object.assign(this.state, { loading: true, activeId: action.id, replyHtml: null, error: "" });
+        this.state.loading = true;
+        this.state.activeId = action.id;
+        this.state.replyHtml = null;
+        this.state.error = "";
         try {
             const result = await rpc("/ai_brain/finance", { action: action.id, prompt: action.prompt });
             const raw = result?.reply ?? JSON.stringify(result, null, 2);
@@ -56,7 +60,8 @@ export class AiBrainPanel extends Component {
         if (!q) return;
         this.state.messages = [...this.state.messages, { role: "user", text: q }];
         this.state.customPrompt = "";
-        Object.assign(this.state, { loading: true, activeId: "custom" });
+        this.state.loading = true;
+        this.state.activeId = "custom";
         try {
             const result = await rpc("/ai_brain/finance", { action: "custom", prompt: q });
             const raw = result?.reply ?? JSON.stringify(result, null, 2);
@@ -75,7 +80,9 @@ export class AiBrainPanel extends Component {
     onKeydown(ev) { if (ev.key === "Enter") this.onAsk(); }
 
     onClear() {
-        Object.assign(this.state, { replyHtml: null, error: "", activeId: null });
+        this.state.replyHtml = null;
+        this.state.error = "";
+        this.state.activeId = null;
     }
 
     onClearChat() {
@@ -157,10 +164,21 @@ ${this.state.replyHtml}
 AiBrainPanel.template = "ai_brain.AiBrainPanel";
 registry.category("actions").add("ai_brain.panel", AiBrainPanel);
 
-// Systray robot icon
+// Systray robot icon — click opens the AI Brain Finance Panel
 class AiBrainSystray extends Component {
+    static props = {};
+
+    setup() {
+        this.actionService = useService("action");
+    }
+
+    onClick() {
+        this.actionService.doAction("ai_brain.action_ai_brain_panel");
+    }
+
     static template = xml`
-        <div class="o_menu_systray_item o_ai_brain_systray" title="AI Brain">
+        <div class="o_menu_systray_item o_ai_brain_systray" title="AI Brain"
+             t-on-click="onClick" style="cursor:pointer">
             <i class="fa fa-robot" role="img" aria-label="AI Brain"/>
         </div>
     `;
