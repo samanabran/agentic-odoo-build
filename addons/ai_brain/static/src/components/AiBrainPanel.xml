@@ -19,18 +19,42 @@
                 </div>
             </div>
 
-            <!-- RIGHT: Output + status bar + message input -->
+            <!-- RIGHT: Report (3/4) + Chat (1/4) -->
             <div class="o_ai_brain_main">
 
-                <!-- Top: large output / dashboard area -->
+                <!-- TOP 3/4: large report / dashboard output area -->
                 <div class="o_ai_brain_output">
-                    <t t-if="state.loading">
+
+                    <!-- Report header bar (only when report is loaded) -->
+                    <t t-if="state.replyHtml or state.error">
+                        <div class="o_ai_brain_report_bar">
+                            <span class="o_ai_report_title">
+                                <i class="fa fa-bar-chart"/> <strong t-esc="this.getActiveLabel()"/>
+                            </span>
+                            <div class="o_ai_report_actions">
+                                <button t-if="state.replyHtml"
+                                        class="btn btn-sm btn-outline-primary"
+                                        t-on-click="onDownloadReport"
+                                        title="Download report as HTML">
+                                    <i class="fa fa-download"/> Download
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary"
+                                        t-on-click="onClear">
+                                    <i class="fa fa-times"/> Clear
+                                </button>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- Loading state -->
+                    <t t-if="state.loading and state.activeId !== 'custom'">
                         <div class="o_ai_brain_loading">
                             <i class="fa fa-spinner fa-spin fa-2x"/>
                             <p>Analysing your data…</p>
                         </div>
                     </t>
 
+                    <!-- Error state -->
                     <t t-elif="state.error">
                         <div class="o_ai_brain_result_body">
                             <div class="alert alert-danger mt-2">
@@ -41,58 +65,88 @@
                         </div>
                     </t>
 
+                    <!-- Report HTML -->
                     <t t-elif="state.replyHtml">
                         <div class="o_ai_brain_result_body" t-out="state.replyHtml"/>
                     </t>
 
+                    <!-- Empty placeholder -->
                     <t t-else="">
                         <div class="o_ai_brain_empty">
                             <i class="fa fa-bar-chart fa-3x"/>
-                            <p>Select a Quick Command on the left to generate a report</p>
-                            <p class="o_ai_empty_sub">Or type a custom question in the message bar below</p>
+                            <p>Select a Quick Command to generate a report</p>
+                            <p class="o_ai_empty_sub">Or type a question in the chat below</p>
                         </div>
                     </t>
                 </div>
 
-                <!-- Middle: status strip (active report + clear) -->
-                <div class="o_ai_brain_status_bar">
-                    <span class="o_ai_active_label">
-                        <t t-if="state.activeId and state.activeId !== 'custom'">
-                            <i class="fa fa-circle text-success"/> Active:
-                            <strong t-esc="this.getActiveLabel()"/>
-                        </t>
-                        <t t-elif="state.activeId === 'custom'">
-                            <i class="fa fa-circle text-primary"/> Custom query
-                        </t>
-                        <t t-else="">
-                            <i class="fa fa-circle-o text-muted"/> No report selected
-                        </t>
-                    </span>
-                    <button t-if="state.replyHtml or state.error"
-                            class="btn btn-sm btn-outline-secondary"
-                            t-on-click="onClear">
-                        <i class="fa fa-times"/> Clear
-                    </button>
-                </div>
+                <!-- BOTTOM 1/4: Chat conversation area -->
+                <div class="o_ai_brain_chat">
 
-                <!-- Bottom: message input bar -->
-                <div class="o_ai_brain_input_bar">
-                    <input
-                        type="text"
-                        id="ai_brain_message"
-                        name="ai_brain_message"
-                        autocomplete="off"
-                        class="o_ai_message_input"
-                        placeholder="Enter message…"
-                        t-model="state.customPrompt"
-                        t-on-keydown="onKeydown"
-                        t-att-disabled="state.loading"
-                    />
-                    <button class="o_ai_send_btn" t-on-click="onAsk" t-att-disabled="state.loading or !state.customPrompt">
-                        <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-arrow-right' }}"/>
-                    </button>
-                </div>
+                    <!-- Chat header -->
+                    <div class="o_ai_chat_header">
+                        <span><i class="fa fa-comments-o"/> AI Assistant</span>
+                        <button t-if="state.messages.length"
+                                class="btn btn-xs btn-link"
+                                t-on-click="onClearChat">
+                            <i class="fa fa-trash-o"/> Clear chat
+                        </button>
+                    </div>
 
+                    <!-- Message bubbles (scrollable) -->
+                    <div class="o_ai_chat_messages">
+                        <!-- Loading bubble for custom queries -->
+                        <t t-if="state.loading and state.activeId === 'custom'">
+                            <div class="o_ai_msg o_ai_msg_ai">
+                                <div class="o_ai_bubble">
+                                    <i class="fa fa-spinner fa-spin"/> Thinking…
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- No messages placeholder -->
+                        <t t-if="!state.messages.length and !(state.loading and state.activeId === 'custom')">
+                            <div class="o_ai_chat_empty">
+                                <i class="fa fa-comment-o"/> Ask me anything about your data…
+                            </div>
+                        </t>
+
+                        <!-- Render messages -->
+                        <t t-foreach="state.messages" t-as="msg" t-key="msg_index">
+                            <div t-attf-class="o_ai_msg {{ msg.role === 'user' ? 'o_ai_msg_user' : 'o_ai_msg_ai' }}">
+                                <div class="o_ai_bubble">
+                                    <t t-if="msg.html">
+                                        <span t-out="msg.html"/>
+                                    </t>
+                                    <t t-else="">
+                                        <t t-esc="msg.text"/>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Input bar -->
+                    <div class="o_ai_brain_input_bar">
+                        <input
+                            type="text"
+                            id="ai_brain_message"
+                            name="ai_brain_message"
+                            autocomplete="off"
+                            class="o_ai_message_input"
+                            placeholder="Ask a question…"
+                            t-model="state.customPrompt"
+                            t-on-keydown="onKeydown"
+                            t-att-disabled="state.loading"
+                        />
+                        <button class="o_ai_send_btn"
+                                t-on-click="onAsk"
+                                t-att-disabled="state.loading or !state.customPrompt">
+                            <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-arrow-right' }}"/>
+                        </button>
+                    </div>
+
+                </div>
             </div>
 
         </div>

@@ -335,7 +335,7 @@ def _fetch_leaves(env, today):
 def _fetch_sales_pipeline(env, today, currency):
     if not _model_exists(env, "crm.lead"):
         return "LIVE ODOO DATA — CRM: module not installed.\n"
-    leads = env["crm.lead"].search([("active", "=", True), ("probability", ">", 0)])
+    leads = env["crm.lead"].search([("active", "=", True), ("type", "=", "opportunity")])
     by_stage = defaultdict(lambda: {"count": 0, "value": 0.0})
     for l in leads:
         stage = l.stage_id.name or "Unknown"
@@ -560,9 +560,9 @@ class AiBrainController(http.Controller):
             context = ""
             instruction = prompt or "No data available."
 
-        extra = f"\n\nAdditional question: {prompt}" if prompt and action not in ("custom", "") else ""
+        extra = f"\n\nAdditional question from user: {prompt}" if prompt and action not in ("custom", "") else ""
         full_prompt = (
-            f"{context}\n---\nINSTRUCTION: {instruction}{extra}"
+            f"REPORT TYPE: {instruction}\n\nLIVE DATA:\n{context}{extra}"
             if context
             else instruction
         )
