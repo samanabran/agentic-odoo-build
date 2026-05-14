@@ -140,6 +140,7 @@
                             t-att-disabled="state.loading"
                         />
                         <button class="o_ai_send_btn"
+                                aria-label="Send message"
                                 t-on-click="onAsk"
                                 t-att-disabled="state.loading or !state.customPrompt">
                             <i t-attf-class="fa {{ state.loading and state.activeId === 'custom' ? 'fa-spinner fa-spin' : 'fa-arrow-right' }}"/>
