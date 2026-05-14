@@ -14,6 +14,18 @@ import importlib
 import sys
 from pathlib import Path
 
+# Windows cp1252 can't encode arrow/emoji characters used in task messages.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+
+# Load .env from project root so eval tasks see all required env vars without
+# the caller having to source the file manually.
+try:
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).parent.parent.parent / ".env", override=False)
+except ImportError:
+    pass
+
 
 def run_all(filter_prefix: str = "") -> None:
     tasks_dir = Path(__file__).parent / "tasks"

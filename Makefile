@@ -14,7 +14,7 @@ up:
 bootstrap-pydantic:  ## install vendor llm deps missing from Odoo 18 base image (ADR 0012)
 	$(COMPOSE) exec odoo pip install --break-system-packages \
 	  pydantic mcp emoji markdown2 jinja2 pyyaml jsonschema \
-	  openai ollama pgvector numpy requests markdownify PyMuPDF
+	  openai ollama pgvector numpy requests markdownify PyMuPDF mistralai
 
 up-private:
 	$(COMPOSE) --profile private up -d

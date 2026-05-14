@@ -14,8 +14,11 @@ EXPECTED_MODELS = {"github-dev", "prod-default", "prod-alternate", "prod-local"}
 
 def run() -> tuple[bool, bool, str]:
     """Return (passed, skipped, message)."""
+    master_key = os.getenv("LITELLM_MASTER_KEY", "")
+    if not master_key:
+        return False, True, "LITELLM_MASTER_KEY not set"
     try:
-        r = httpx.get(f"{LITELLM_URL}/v1/models", timeout=10.0)
+        r = httpx.get(f"{LITELLM_URL}/v1/models", headers={"Authorization": f"Bearer {master_key}"}, timeout=10.0)
         r.raise_for_status()
         present = {m["id"] for m in r.json().get("data", [])}
         missing = EXPECTED_MODELS - present

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Agentic Odoo Build — TODO</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; background: #f8f9fa; color: #212529; }
+  h1 { font-size: 1.4rem; border-bottom: 2px solid #dee2e6; padding-bottom: 8px; }
+  h2 { font-size: 1rem; margin-top: 28px; color: #495057; text-transform: uppercase; letter-spacing: .05em; }
+  ul { list-style: none; padding: 0; }
+  li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 10px; border-radius: 6px; margin: 4px 0; background: #fff; border: 1px solid #dee2e6; }
+  li input[type=checkbox] { margin-top: 3px; flex-shrink: 0; }
+  code { background: #e9ecef; padding: 1px 5px; border-radius: 3px; font-size: .85em; }
+  .tag { font-size: .72em; padding: 2px 7px; border-radius: 10px; font-weight: 600; flex-shrink: 0; margin-left: auto; }
+  .blocker { background: #f8d7da; color: #842029; }
+  .needed  { background: #fff3cd; color: #664d03; }
+  .nice    { background: #d1e7dd; color: #0a3622; }
+</style>
+</head>
+<body>
+
+<h1>Agentic Odoo Build — Pending Items</h1>
+<p style="color:#6c757d;font-size:.85rem">Branch: <code>m3-r1-route-intercept</code> &nbsp;|&nbsp; PR: <a href="https://github.com/samanabran/agentic-odoo-build/pull/13">#13</a> &nbsp;|&nbsp; 2026-05-12</p>
+
+<h2>PR #13 — Before Merge</h2>
+<ul>
+  <li><input type="checkbox"><span>Run <code>make test</code> — all tests must be green</span><span class="tag blocker">BLOCKER</span></li>
+  <li><input type="checkbox"><span>Run <code>make eval</code> — pass-rate must not regress vs main</span><span class="tag blocker">BLOCKER</span></li>
+  <li><input type="checkbox"><span>Run <code>make lint</code> — ruff + mypy clean</span><span class="tag blocker">BLOCKER</span></li>
+  <li><input type="checkbox"><span>Append ADR 0013 R1 live verification section to <code>docs/adr/0013-m3-conversation-architecture.md</code> (smoke-test evidence required per I2)</span><span class="tag blocker">BLOCKER</span></li>
+  <li><input type="checkbox"><span>Squash-merge PR #13 into main</span><span class="tag blocker">BLOCKER</span></li>
+</ul>
+
+<h2>Environment</h2>
+<ul>
+  <li><input type="checkbox"><span>Log into Odoo as admin and confirm backend CSS (<code>web.assets_web.min.css</code>) loads with no browser console errors</span><span class="tag needed">NEEDED</span></li>
+  <li><input type="checkbox"><span>Rotate <code>GITHUB_TOKEN</code> in <code>.env</code> — token was read during this session</span><span class="tag needed">NEEDED</span></li>
+  <li><input type="checkbox"><span>Install <code>gh</code> CLI (<a href="https://cli.github.com">cli.github.com</a>) to avoid raw API calls for future PRs</span><span class="tag nice">NICE</span></li>
+</ul>
+
+<h2>M3 — Remaining Risks (after PR #13)</h2>
+<ul>
+  <li><input type="checkbox"><span>R4 — Context chip wiring at controller layer (PR #14)</span><span class="tag needed">NEEDED</span></li>
+  <li><input type="checkbox"><span>R5 — Token accounting fields on <code>mail.message</code> (PR #15)</span><span class="tag needed">NEEDED</span></li>
+</ul>
+
+<h2>Upcoming Milestones</h2>
+<ul>
+  <li><input type="checkbox"><span>M4 — Auth enforcement, tool registry, approval flow, <code>ai.tool.log</code></span><span class="tag nice">NEXT</span></li>
+  <li><input type="checkbox"><span>M5 — RAG / <code>ai.knowledge.chunk</code>, vector search</span><span class="tag nice">NEXT</span></li>
+</ul>
+
+</body>
+</html>

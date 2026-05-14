@@ -28,10 +28,15 @@ class ChatResponse(BaseModel):
 async def _call_litellm(prompt: str, model: str) -> str:
     """Single LiteLLM call via the LiteLLM proxy — γ-thin scope (ADR 0013 Decision 2)."""
     litellm_url = os.getenv("LITELLM_URL", "http://litellm:4000")
+    headers = {}
+    litellm_master_key = os.getenv("LITELLM_MASTER_KEY")
+    if litellm_master_key:
+        headers["Authorization"] = f"Bearer {litellm_master_key}"
     async with httpx.AsyncClient() as client:
         resp = await client.post(
             f"{litellm_url}/chat/completions",
             json={"model": model, "messages": [{"role": "user", "content": prompt}]},
+            headers=headers,
             timeout=60.0,
         )
     resp.raise_for_status()

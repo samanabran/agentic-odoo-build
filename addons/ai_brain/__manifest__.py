@@ -7,25 +7,18 @@
     "depends": [
         "base",
         "web",
-        # Apexive vendor modules (M2) — must be installed first via
-        # scripts/install_vendor_modules.sh; loaded from addons/vendor/odoo-llm
-        "llm",
-        "llm_thread",
-        "llm_tool",
-        "llm_assistant",
-        "llm_openai",
-        "llm_ollama",
-        "llm_pgvector",
-        "llm_knowledge",
-        "llm_tool_knowledge",
-        # NOT included: llm_mcp_server (M7), llm_tool_account (M7)
+        "mail",
+        "account",
     ],
     "data": [
         "security/ir.model.access.csv",
-        "data/llm_providers.xml",
+        "templates/dashboard.xml",
+        "views/ai_panel_actions.xml",
     ],
     "assets": {
         "web.assets_backend": [
+            "ai_brain/static/src/components/AiBrainPanel.scss",
+            "ai_brain/static/src/components/AiBrainPanel.xml",
             "ai_brain/static/src/components/AiBrainPanel.js",
         ],
     },

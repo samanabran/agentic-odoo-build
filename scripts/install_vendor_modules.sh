@@ -20,15 +20,19 @@ DB_NAME="${DB_NAME:-odoo}"
 ODOO_URL="${ODOO_URL:-http://localhost:8069}"
 ADMIN_PASSWD="${ODOO_ADMIN_PASSWD:-admin}"
 
-# Ordered install list (B1 Tier 2) — llm_mcp_server and llm_tool_account are M7
+# Topological install order — transitive deps included, private-mode modules excluded
+# NOT included: llm_ollama (private mode only), llm_pgvector (M5, needs pgvector ext)
+# NOT included: llm_mcp_server (M7), llm_tool_account (M7)
 MODULES=(
   llm
   llm_thread
   llm_tool
+  llm_store
+  llm_training
+  web_json_editor
   llm_assistant
   llm_openai
-  llm_ollama
-  llm_pgvector
+  llm_mistral
   llm_knowledge
   llm_tool_knowledge
 )

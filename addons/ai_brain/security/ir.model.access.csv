@@ -2,3 +2,11 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_ai_origin_mixin_user,ai.origin.mixin user,model_ai_origin_mixin,base.group_user,1,0,0,0
 access_ai_tool_log_user,ai.tool.log user read,model_ai_tool_log,base.group_user,1,0,0,0
 access_ai_tool_log_system,ai.tool.log system write,model_ai_tool_log,base.group_system,1,1,1,0
+access_ai_reconciliation_session_user,ai.reconciliation.session.user,model_ai_reconciliation_session,base.group_user,1,0,0,0
+access_ai_reconciliation_session_accountant,ai.reconciliation.session.accountant,model_ai_reconciliation_session,base.group_system,1,1,1,1
+access_ai_reconciliation_suggestion_user,ai.reconciliation.suggestion.user,model_ai_reconciliation_suggestion,base.group_user,1,0,0,0
+access_ai_reconciliation_suggestion_accountant,ai.reconciliation.suggestion.accountant,model_ai_reconciliation_suggestion,base.group_system,1,1,1,1
+access_ai_aml_alert_accountant,ai.aml.alert.accountant,model_ai_aml_alert,base.group_system,1,1,1,1
+access_ai_brain_finance_user,ai.brain.finance user,model_ai_brain_finance,base.group_user,1,1,1,1
+access_ai_conversation_user,ai.conversation user,model_ai_conversation,base.group_user,1,1,1,0
+access_ai_conversation_system,ai.conversation system,model_ai_conversation,base.group_system,1,1,1,1

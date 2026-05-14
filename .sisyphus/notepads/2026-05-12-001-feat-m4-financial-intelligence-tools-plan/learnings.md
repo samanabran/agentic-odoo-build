@@ -1,0 +1,12 @@
+2026-05-12: Orchestrator API endpoints in this repo follow the /chat pattern closely: explicit Bearer header validation, decode_access_token exception mapping, and get_active_model() for LiteLLM routing.
+2026-05-12: For untrusted financial payloads, wrapping serialized items in <untrusted> tags is straightforward with json.dumps(..., default=str, indent=2) before passing to LiteLLM.
+2026-05-12: Pure pytest coverage for addon utility modules can avoid Odoo imports by loading the target file with importlib.util.spec_from_file_location and gating addon __init__.py imports on ModuleNotFoundError for "odoo" only.
+2026-05-12: The deterministic matching engine spec maps cleanly to four score bands plus a currency short-circuit; date proximity and partner match should be treated as ordered tie-break bands rather than additive point totals.
+2026-05-12: ai_brain model modules can use `from . import module as module` in `models/__init__.py` to keep Odoo registry imports explicit while avoiding Ruff F401 warnings.
+2026-05-12: Finance-side orchestrator calls can reuse the same HS256 JWT minting contract as the chat controller; for Odoo-side tools, posting to ORCH_URL with a short-lived Bearer token keeps runtime aligned with ADR 0013 without calling provider SDKs directly.
+2026-05-12: Extending `ai.tool.log` with E4 audit fields is enough for new tool methods to write append-only audit entries using sudo().create(), even before dedicated UI/reporting work lands.
+2026-05-12: For write-capable llm tools in ai_brain, decorator metadata must match actual side effects (`requires_user_consent=True`, not `read_only_hint=True`) or the review gate will correctly flag approval-flow violations.
+2026-05-12: Audit rows for E4 are easier to keep consistent if the tool code builds a single audit-context dict up front (conversation/message/origin IP/approved_by) and derives SHA-256 hashes for truncated args/result payloads before create().
+2026-05-12: Odoo dashboard controllers can force exact 302 login/dashboard redirects by using werkzeug.utils.redirect with auth='public' and explicit session checks instead of relying on Odoo's default auth='user' redirect semantics.
+- Added M4-U6 eval tasks as standalone run()-based modules because orchestrator/eval/runner.py discovers synchronous task_*.py files via importlib and expects run() -> tuple[bool, bool, str].
+- Odoo-backed eval tasks authenticate via /web/session/authenticate and execute finance tools through /web/dataset/call_kw, matching existing eval patterns for stack-integrated checks.

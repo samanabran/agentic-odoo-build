@@ -1,0 +1,6 @@
+{
+  "title": "M3-R1: Route intercept + glassmorphism login + LiteLLM fallbacks",
+  "head": "m3-r1-route-intercept",
+  "base": "main",
+  "body": "## Summary\n\nThis PR delivers M3-R1 (Route Intercept milestone):\n\n### Features\n- Route intercept controller with `/ai_brain/gate` endpoint\n- Premium glassmorphism login CSS + QWeb template override\n- LiteLLM fallback model groups in config.yaml\n- Bootstrap vendor/rfs SCSS error fix\n\n### Files Changed (14 files, +1065 lines)\n- `addons/ai_brain/controllers/ai_brain_thread.py` - route intercept\n- `addons/ai_brain/static/src/css/auth.css` - glassmorphism login\n- `addons/ai_brain/views/auth_templates.xml` - QWeb login template override\n- `addons/ai_brain/tests/test_route_intercept.py` - route intercept tests\n- `addons/vendor/_rfs.scss` - Bootstrap RFS vendor fix\n- `orchestrator/app/api/gate.py` - gate endpoint\n- `orchestrator/tests/test_chat_gate.py` - gate tests\n- `infra/litellm/config.yaml` - fallback model groups added\n- `.env.example` - GROQ_API_KEY + MISTRAL_API_KEY placeholders\n\n### Testing\n- Unit tests pass\n- Odoo module loads without errors\n- Orchestrator gate endpoint functional\n\nReady for squash-merge to main."
+}

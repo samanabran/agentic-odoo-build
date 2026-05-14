@@ -1,8 +1,8 @@
 # Odoo AI Brain
 
-An AI layer for Odoo 19 — in-app chat assistant with full audit trail, human-in-the-loop approval, and RAG over all permitted Odoo records.
+An AI layer for Odoo 18 — in-app chat assistant with full audit trail, human-in-the-loop approval, and RAG over all permitted Odoo records.
 
-Built on top of Odoo 19's native `productivity.ai` app and Apexive's `odoo-llm` framework.
+Built on top of Odoo's native AI/chat surface and Apexive's `odoo-llm` framework.
 
 ## Prerequisites
 
@@ -49,17 +49,16 @@ OLLAMA_SKIP_PULL=true bash scripts/bootstrap.sh
 | `make shell-orch` | Shell into the orchestrator container |
 | `make test` | Run the orchestrator test suite |
 | `make eval` | Run the golden-task evaluation harness (M8) |
-| `make patch-vendor` | Apply Odoo 19 compatibility patches to the vendor submodule (M2) |
+| `make bootstrap-pydantic` | Install missing Python deps in Odoo container (ADR 0012) |
 
 ## Project structure
 
 ```
 addons/ai_brain/        Custom Odoo module
-addons/vendor/          git submodule: apexive/odoo-llm (added in M2)
+addons/vendor/          git submodule: apexive/odoo-llm (pinned)
 orchestrator/           FastAPI orchestration service
 infra/                  docker-compose, nginx, LiteLLM config
 docs/                   Architecture docs, runbooks, ADRs
-patches/vendor/         Odoo 19 compatibility patches for vendor modules
 scripts/                Bootstrap, seed, and reindex scripts
 ```
 

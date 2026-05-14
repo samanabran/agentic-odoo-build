@@ -29,6 +29,83 @@ model_list:
       api_base: https://models.github.ai/inference
       api_key: os.environ/GITHUB_TOKEN
 
+  - model_name: github-gpt4o
+    litellm_params:
+      model: openai/gpt-4o
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: github-mistral
+    litellm_params:
+      model: openai/mistral-ai/Mistral-small
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: github-llama
+    litellm_params:
+      model: openai/meta/Meta-Llama-3.1-8B-Instruct
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  # ── Production Mistral (native provider, not GitHub proxy) ────────────────
+  - model_name: prod-mistral
+    litellm_params:
+      model: mistral/mistral-small-latest
+      api_key: os.environ/MISTRAL_API_KEY
+
+  # ── Production Groq (high-speed inference) ────────────────────────────────
+  - model_name: prod-groq
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+
+  # ── Production OpenCode (OpenAI-compatible endpoint) ──────────────────────
+  - model_name: prod-opencode
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_base: os.environ/OPENCODE_API_BASE
+      api_key: os.environ/OPENCODE_API_KEY
+
+  # ── Fallback providers ─────────────────────────────────────────────────────
+  - model_name: fallback-groq
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+
+  - model_name: fallback-mistral
+    litellm_params:
+      model: mistral/mistral-small-latest
+      api_key: os.environ/MISTRAL_API_KEY
+
+  # ── Task-specialised routing aliases ──────────────────────────────────────
+  - model_name: task-code
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: task-analysis
+    litellm_params:
+      model: openai/mistral-ai/Mistral-small
+      api_base: https://models.github.ai/inference
+      api_key: os.environ/GITHUB_TOKEN
+
+  - model_name: task-summary
+    litellm_params:
+      model: groq/llama-3.1-8b-instant
+      api_key: os.environ/GROQ_API_KEY
+
+router_settings:
+  fallbacks:
+    - prod-default:  [prod-alternate, prod-mistral, fallback-groq]
+    - prod-mistral:  [fallback-mistral, prod-groq]
+    - prod-groq:     [fallback-groq, prod-mistral]
+    - prod-opencode: [prod-alternate, fallback-groq]
+    - github-dev:    [github-mistral, github-llama, fallback-groq, fallback-mistral]
+    - task-code:     [fallback-groq, fallback-mistral]
+    - task-analysis: [fallback-mistral, fallback-groq]
+    - task-summary:  [fallback-groq, fallback-mistral]
+
 litellm_settings:
   drop_params: true
   request_timeout: 60
