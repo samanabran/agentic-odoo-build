@@ -19,13 +19,13 @@
                 </div>
             </div>
 
-            <!-- RIGHT: Report (3/4) + Chat (1/4) -->
+            <!-- RIGHT: Report area + Chat input -->
             <div class="o_ai_brain_main">
 
-                <!-- TOP 3/4: large report / dashboard output area -->
+                <!-- TOP: large report / dashboard output area -->
                 <div class="o_ai_brain_output">
 
-                    <!-- Report header bar (only when report is loaded) -->
+                    <!-- Report header bar (only when report is loaded or error) -->
                     <t t-if="state.replyHtml or state.error">
                         <div class="o_ai_brain_report_bar">
                             <span class="o_ai_report_title">
@@ -35,8 +35,8 @@
                                 <button t-if="state.replyHtml"
                                         class="btn btn-sm btn-outline-primary"
                                         t-on-click="onDownloadReport"
-                                        title="Download report as HTML">
-                                    <i class="fa fa-download"/> Download
+                                        title="Download report as PDF">
+                                    <i class="fa fa-file-pdf-o"/> PDF
                                 </button>
                                 <button class="btn btn-sm btn-outline-secondary"
                                         t-on-click="onClear">
@@ -46,8 +46,8 @@
                         </div>
                     </t>
 
-                    <!-- Loading state -->
-                    <t t-if="state.loading and state.activeId !== 'custom'">
+                    <!-- Loading state (all commands, including custom chat) -->
+                    <t t-if="state.loading">
                         <div class="o_ai_brain_loading">
                             <i class="fa fa-spinner fa-spin fa-2x"/>
                             <p>Analysing your data…</p>
@@ -74,59 +74,19 @@
                     <t t-else="">
                         <div class="o_ai_brain_empty">
                             <i class="fa fa-bar-chart fa-3x"/>
-                            <p>Select a Quick Command to generate a report</p>
-                            <p class="o_ai_empty_sub">Or type a question in the chat below</p>
+                            <p>Select a Quick Command or ask a question below</p>
+                            <p class="o_ai_empty_sub">Reports and answers appear here</p>
                         </div>
                     </t>
                 </div>
 
-                <!-- BOTTOM 1/4: Chat conversation area -->
+                <!-- BOTTOM: Chat input bar -->
                 <div class="o_ai_brain_chat">
 
-                    <!-- Chat header -->
                     <div class="o_ai_chat_header">
                         <span><i class="fa fa-comments-o"/> AI Assistant</span>
-                        <button t-if="state.messages.length"
-                                class="btn btn-xs btn-link"
-                                t-on-click="onClearChat">
-                            <i class="fa fa-trash-o"/> Clear chat
-                        </button>
                     </div>
 
-                    <!-- Message bubbles (scrollable) -->
-                    <div class="o_ai_chat_messages">
-                        <!-- Loading bubble for custom queries -->
-                        <t t-if="state.loading and state.activeId === 'custom'">
-                            <div class="o_ai_msg o_ai_msg_ai">
-                                <div class="o_ai_bubble">
-                                    <i class="fa fa-spinner fa-spin"/> Thinking…
-                                </div>
-                            </div>
-                        </t>
-
-                        <!-- No messages placeholder -->
-                        <t t-if="!state.messages.length and !(state.loading and state.activeId === 'custom')">
-                            <div class="o_ai_chat_empty">
-                                <i class="fa fa-comment-o"/> Ask me anything about your data…
-                            </div>
-                        </t>
-
-                        <!-- Render messages -->
-                        <t t-foreach="state.messages" t-as="msg" t-key="msg_index">
-                            <div t-attf-class="o_ai_msg {{ msg.role === 'user' ? 'o_ai_msg_user' : 'o_ai_msg_ai' }}">
-                                <div class="o_ai_bubble">
-                                    <t t-if="msg.html">
-                                        <span t-out="msg.html"/>
-                                    </t>
-                                    <t t-else="">
-                                        <t t-esc="msg.text"/>
-                                    </t>
-                                </div>
-                            </div>
-                        </t>
-                    </div>
-
-                    <!-- Input bar -->
                     <div class="o_ai_brain_input_bar">
                         <input
                             type="text"

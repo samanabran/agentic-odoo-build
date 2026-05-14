@@ -37,9 +37,9 @@ export class AiBrainPanel extends Component {
             loading: false,
             activeId: null,
             replyHtml: null,
-            messages: [],
             error: "",
             customPrompt: "",
+            lastQuestion: "",
         });
         this.actions = ACTIONS;
     }
@@ -61,24 +61,22 @@ export class AiBrainPanel extends Component {
         }
     }
 
-    // ── Custom message → adds to chat history ───────────────────────────────
+    // ── Custom message → also renders in big report area ────────────────────
     async onAsk() {
         const q = this.state.customPrompt.trim();
         if (!q) return;
-        this.state.messages = [...this.state.messages, { role: "user", text: q }];
+        this.state.lastQuestion = q;
         this.state.customPrompt = "";
         this.state.loading = true;
         this.state.activeId = "custom";
+        this.state.replyHtml = null;
+        this.state.error = "";
         try {
             const result = await rpc("/ai_brain/finance", { action: "custom", prompt: q });
             const raw = result?.reply ?? JSON.stringify(result, null, 2);
-            this.state.messages = [
-                ...this.state.messages,
-                { role: "ai", text: raw, html: raw ? markup(raw) : null },
-            ];
+            this.state.replyHtml = raw ? markup(raw) : null;
         } catch (err) {
-            const msg = err?.data?.message || err?.message || "Request failed.";
-            this.state.messages = [...this.state.messages, { role: "ai", text: msg, html: null }];
+            this.state.error = err?.data?.message || err?.message || "Request failed — please try again.";
         } finally {
             this.state.loading = false;
         }
@@ -90,81 +88,86 @@ export class AiBrainPanel extends Component {
         this.state.replyHtml = null;
         this.state.error = "";
         this.state.activeId = null;
-    }
-
-    onClearChat() {
-        this.state.messages = [];
+        this.state.lastQuestion = "";
     }
 
     getActiveLabel() {
+        if (this.state.activeId === "custom") return this.state.lastQuestion || "Custom Query";
         const a = ACTIONS.find(x => x.id === this.state.activeId);
         return a ? a.label : (this.state.activeId || "");
     }
 
-    // ── Download current report as HTML attachment ──────────────────────────
+    // ── Open print-friendly window and trigger browser PDF export ───────────
     onDownloadReport() {
         if (!this.state.replyHtml) return;
         const label = this.getActiveLabel() || "report";
         const date  = new Date().toISOString().slice(0, 10);
-        const htmlContent = `<!DOCTYPE html>
+        const win = window.open("", "_blank");
+        if (!win) return;
+        win.document.write(`<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>SGCTech AI — ${label} — ${date}</title>
 <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 32px; max-width: 960px; margin: 0 auto; background: #0f1923; color: #f8fafc; }
-  h1 { font-size: 1.25rem; font-weight: 700; color: #f8fafc; border-bottom: 1px solid #2d4057; padding-bottom: 8px; margin: 0 0 16px; }
-  h2 { font-size: 1rem; font-weight: 700; color: #06BEA0; margin: 16px 0 10px; }
-  h3 { font-size: 0.9rem; font-weight: 700; color: #94a3b8; margin: 12px 0 8px; }
-  p  { color: #94a3b8; margin: 6px 0 10px; }
-  hr { border: none; border-top: 1px solid #2d4057; margin: 14px 0; }
-  ul, ol { padding-left: 20px; color: #94a3b8; }
-  strong { color: #f8fafc; font-weight: 700; }
-  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; background: #243447; border-radius: 8px; overflow: hidden; border: 1px solid #2d4057; }
-  th { padding: 9px 12px; background: #1e2d3d; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid #2d4057; text-align: left; color: #06BEA0; }
-  td { padding: 8px 12px; border-bottom: 1px solid #2d4057; color: #94a3b8; }
+  @media print { .no-print { display: none; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 32px; max-width: 960px; margin: 0 auto; background: #fff; color: #1e293b; }
+  h1 { font-size: 1.25rem; font-weight: 700; color: #1e293b; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin: 0 0 16px; }
+  h2 { font-size: 1rem; font-weight: 700; color: #0891b2; margin: 16px 0 10px; }
+  h3 { font-size: 0.9rem; font-weight: 700; color: #475569; margin: 12px 0 8px; }
+  p  { color: #475569; margin: 6px 0 10px; }
+  hr { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
+  ul, ol { padding-left: 20px; color: #475569; }
+  strong { color: #1e293b; font-weight: 700; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.85rem; border: 1px solid #e2e8f0; }
+  th { padding: 9px 12px; background: #f1f5f9; font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 2px solid #e2e8f0; text-align: left; color: #0891b2; }
+  td { padding: 8px 12px; border-bottom: 1px solid #e2e8f0; color: #475569; }
   tr:last-child td { border-bottom: none; }
-  tr:hover td { background: #1e2d3d; }
   .ai-metric-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 12px 0 18px; }
-  .ai-metric-card { border: 1px solid #2d4057; border-radius: 10px; padding: 14px 16px; background: #243447; }
-  .ai-metric-label { font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
-  .ai-metric-value { font-size: 1.3rem; font-weight: 700; color: #f8fafc; margin-top: 5px; }
-  .ai-metric-sub   { font-size: 0.72rem; color: #64748b; margin-top: 2px; }
-  .ai-metric-card.danger  { border-color: #7f1d1d; background: #180808; } .ai-metric-card.danger  .ai-metric-value { color: #f87171; }
-  .ai-metric-card.warning { border-color: #78350f; background: #180f04; } .ai-metric-card.warning .ai-metric-value { color: #fbbf24; }
-  .ai-metric-card.success { border-color: #14532d; background: #061310; } .ai-metric-card.success .ai-metric-value { color: #4ade80; }
+  .ai-metric-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 16px; background: #f8fafc; }
+  .ai-metric-card.danger  { border-color: #fca5a5; background: #fef2f2; }
+  .ai-metric-card.warning { border-color: #fcd34d; background: #fffbeb; }
+  .ai-metric-card.success { border-color: #86efac; background: #f0fdf4; }
+  .ai-metric-label { font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; }
+  .ai-metric-value { font-size: 1.3rem; font-weight: 700; color: #1e293b; margin-top: 5px; }
+  .ai-metric-card.danger  .ai-metric-value { color: #dc2626; }
+  .ai-metric-card.warning .ai-metric-value { color: #d97706; }
+  .ai-metric-card.success .ai-metric-value { color: #16a34a; }
+  .ai-metric-sub { font-size: 0.72rem; color: #94a3b8; margin-top: 2px; }
   .ai-progress-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 12px 0 18px; }
-  .ai-progress-item { background: #243447; border: 1px solid #2d4057; border-radius: 10px; padding: 12px 14px; }
-  .ai-progress-label { font-size: 0.7rem; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
-  .ai-progress-track { height: 6px; background: #2d4057; border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
-  .ai-progress-fill  { height: 100%; border-radius: 4px; background: #06BEA0; min-width: 4px; }
-  .ai-progress-pct   { font-size: 1.05rem; font-weight: 700; color: #f8fafc; }
-  .ai-progress-sub   { font-size: 0.72rem; color: #64748b; }
+  .ai-progress-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; }
+  .ai-progress-label { font-size: 0.7rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 8px; }
+  .ai-progress-track { height: 6px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+  .ai-progress-fill  { height: 100%; border-radius: 4px; background: #0891b2; min-width: 4px; }
+  .ai-progress-pct   { font-size: 1.05rem; font-weight: 700; color: #1e293b; }
+  .ai-progress-sub   { font-size: 0.72rem; color: #94a3b8; }
   .ai-progress-item.danger  .ai-progress-fill { background: #ef4444; }
   .ai-progress-item.warning .ai-progress-fill { background: #f59e0b; }
   .ai-progress-item.success .ai-progress-fill { background: #22c55e; }
   .ai-progress-item.info    .ai-progress-fill { background: #3b82f6; }
   .ai-alert { border-left: 3px solid; padding: 10px 14px; margin: 10px 0; border-radius: 0 8px 8px 0; font-size: 0.87rem; }
-  .ai-alert.critical { border-color: #ef4444; background: #180808; color: #f87171; }
-  .ai-alert.warning  { border-color: #f59e0b; background: #180f04; color: #fbbf24; }
-  .ai-alert.info     { border-color: #3b82f6; background: #080f1e; color: #60a5fa; }
-  .ai-alert.success  { border-color: #06BEA0; background: #061310; color: #07D4B5; }
+  .ai-alert.critical { border-color: #ef4444; background: #fef2f2; color: #dc2626; }
+  .ai-alert.warning  { border-color: #f59e0b; background: #fffbeb; color: #d97706; }
+  .ai-alert.info     { border-color: #3b82f6; background: #eff6ff; color: #2563eb; }
+  .ai-alert.success  { border-color: #10b981; background: #f0fdf4; color: #059669; }
   .badge-ok,.badge-warn,.badge-danger,.badge-info { display:inline-block; padding:2px 9px; border-radius:9999px; font-size:0.72rem; font-weight:700; }
-  .badge-ok { background:#14532d; color:#4ade80; } .badge-warn { background:#78350f; color:#fbbf24; }
-  .badge-danger { background:#7f1d1d; color:#f87171; } .badge-info { background:#1e3a5f; color:#60a5fa; }
+  .badge-ok { background:#dcfce7; color:#16a34a; } .badge-warn { background:#fef9c3; color:#ca8a04; }
+  .badge-danger { background:#fee2e2; color:#dc2626; } .badge-info { background:#dbeafe; color:#2563eb; }
+  .print-meta { font-size: 0.8rem; color: #94a3b8; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; }
+  .print-btn { background: #0891b2; color: #fff; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 0.82rem; }
 </style>
 </head>
 <body>
+<div class="print-meta no-print">
+  <span>SGCTech AI &mdash; <strong>${label}</strong> &mdash; ${date}</span>
+  <button class="print-btn" onclick="window.print()">&#x1F5B6; Save as PDF</button>
+</div>
 ${this.state.replyHtml}
 </body>
-</html>`;
-        const blob = new Blob([htmlContent], { type: "text/html" });
-        const url  = URL.createObjectURL(blob);
-        const a    = document.createElement("a");
-        a.href = url;
-        a.download = `ai-brain-${label.toLowerCase().replace(/\s+/g, "-")}-${date}.html`;
-        a.click();
-        URL.revokeObjectURL(url);
+</html>`);
+        win.document.close();
+        win.focus();
+        setTimeout(() => win.print(), 400);
     }
 }
 
