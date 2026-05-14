@@ -576,11 +576,11 @@ _INSTRUCTIONS = {
 
 class AiBrainController(http.Controller):
 
-    @http.route("/ai_brain/chat", type="jsonrpc", auth="user", methods=["POST"], csrf=False)
+    @http.route("/ai_brain/chat", type="json", auth="user", methods=["POST"], csrf=False)
     def chat(self, prompt: str, thread_id: int = 0, res_model: str = None, res_id: int = None):
         return _call_orchestrator(prompt, thread_id)
 
-    @http.route("/ai_brain/finance", type="jsonrpc", auth="user", methods=["POST"], csrf=False)
+    @http.route("/ai_brain/finance", type="json", auth="user", methods=["POST"], csrf=False)
     def finance(self, action: str = "custom", prompt: str = ""):
         env = request.env
         today = fields.Date.today()
