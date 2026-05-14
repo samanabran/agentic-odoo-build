@@ -25,6 +25,13 @@ const ACTIONS = [
 ];
 
 export class AiBrainPanel extends Component {
+    static props = {
+        action:            { optional: true },
+        actionId:          { optional: true },
+        updateActionState: { optional: true },
+        className:         { optional: true },
+    };
+
     setup() {
         this.state = useState({
             loading: false,
